@@ -144,6 +144,9 @@
     <ClCompile Include="3rdparty\minifb\src\MiniFB_internal.c" />
     <ClCompile Include="3rdparty\minifb\src\MiniFB_timer.c" />
     <ClCompile Include="3rdparty\minifb\src\windows\WinMiniFB.c" />
+    <ClCompile Include="src\core\allocator.c" />
+    <ClCompile Include="src\core\core.c" />
+    <ClCompile Include="src\core\cpu.c" />
     <ClCompile Include="src\main.c" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +155,10 @@
     <ClInclude Include="3rdparty\minifb\src\MiniFB_internal.h" />
     <ClInclude Include="3rdparty\minifb\src\WindowData.h" />
     <ClInclude Include="3rdparty\minifb\src\windows\WindowData_Win.h" />
+    <ClInclude Include="src\core\allocator.h" />
+    <ClInclude Include="src\core\core.h" />
+    <ClInclude Include="src\core\cpu.h" />
+    <ClInclude Include="src\core\macros.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
