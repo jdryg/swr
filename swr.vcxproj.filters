@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{585258dd-630f-4c7e-9b57-325ee09c5f17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty">
+      <UniqueIdentifier>{d320a3c8-d744-4d99-a88b-62c48d5e00da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\minifb">
+      <UniqueIdentifier>{646f6d8b-68dc-4b68-b9a7-d217b1a3d015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\minifb\include">
+      <UniqueIdentifier>{4f758d4e-92a6-412d-8bcf-45fe9e426625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\minifb\src">
+      <UniqueIdentifier>{2a2b0dcd-91fa-421f-8cb5-a1ce1a0866be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\minifb\src\windows">
+      <UniqueIdentifier>{ca9d8186-3fec-4c09-b456-50100a59a4f0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\minifb\src\MiniFB_common.c">
+      <Filter>3rdparty\minifb\src</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\minifb\src\MiniFB_internal.c">
+      <Filter>3rdparty\minifb\src</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\minifb\src\MiniFB_timer.c">
+      <Filter>3rdparty\minifb\src</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\minifb\src\windows\WinMiniFB.c">
+      <Filter>3rdparty\minifb\src\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="3rdparty\minifb\include\MiniFB.h">
+      <Filter>3rdparty\minifb\include</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\minifb\include\MiniFB_enums.h">
+      <Filter>3rdparty\minifb\include</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\minifb\src\MiniFB_internal.h">
+      <Filter>3rdparty\minifb\src</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\minifb\src\WindowData.h">
+      <Filter>3rdparty\minifb\src</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\minifb\src\windows\WindowData_Win.h">
+      <Filter>3rdparty\minifb\src\windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
