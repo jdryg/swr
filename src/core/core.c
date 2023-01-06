@@ -3,12 +3,18 @@
 
 extern bool core_cpu_initAPI(uint64_t featureMask);
 extern void core_cpu_shutdownAPI(void);
+extern bool core_mem_initAPI(void);
+extern void core_mem_shutdownAPI(void);
 extern bool core_allocator_initAPI(void);
 extern void core_allocator_shutdownAPI(void);
 
 bool coreInit(uint64_t cpuFeaturesMask)
 {
 	if (!core_cpu_initAPI(cpuFeaturesMask)) {
+		return false;
+	}
+
+	if (!core_mem_initAPI()) {
 		return false;
 	}
 
@@ -22,5 +28,6 @@ bool coreInit(uint64_t cpuFeaturesMask)
 void coreShutdown(void)
 {
 	core_allocator_shutdownAPI();
+	core_mem_shutdownAPI();
 	core_cpu_shutdownAPI();
 }

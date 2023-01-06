@@ -15,12 +15,12 @@ typedef struct core_allocator_i
 	void* (*realloc)(core_allocator_o* allocator, void* ptr, uint64_t sz, uint64_t align, const char* file, uint32_t line);
 } core_allocator_i;
 
-#define CORE_ALLOC(allocator, sz)                        (allocator)->realloc(allocator->m_Inst, NULL, sz, 0, __FILE__, __LINE__)
-#define CORE_FREE(allocator, ptr)                        (void)(allocator)->realloc(allocator->m_Inst, ptr, 0, 0, __FILE__, __LINE__)
-#define CORE_REALLOC(allocator, ptr, sz)                 (allocator)->realloc(allocator->m_Inst, ptr, sz, 0, __FILE__, __LINE__)
-#define CORE_ALIGNED_ALLOC(allocator, sz, align)         (allocator)->realloc(allocator->m_Inst, NULL, sz, align, __FILE__, __LINE__)
-#define CORE_ALINGED_FREE(allocator, ptr, sz, align)     (void)(allocator)->realloc(allocator->m_Inst, ptr, sz, align, __FILE__, __LINE__)
-#define CORE_ALIGNED_REALLOC(allocator, ptr, sz, align)  (allocator)->realloc(allocator->m_Inst, ptr, sz, align, __FILE__, __LINE__)
+#define CORE_ALLOC(allocator, sz)                    (allocator)->realloc(allocator->m_Inst, NULL, sz, 0, __FILE__, __LINE__)
+#define CORE_FREE(allocator, ptr)                    (void)(allocator)->realloc(allocator->m_Inst, ptr, 0, 0, __FILE__, __LINE__)
+#define CORE_REALLOC(allocator, ptr, sz)             (allocator)->realloc(allocator->m_Inst, ptr, sz, 0, __FILE__, __LINE__)
+#define CORE_ALIGNED_ALLOC(allocator, sz, align)     (allocator)->realloc(allocator->m_Inst, NULL, sz, align, __FILE__, __LINE__)
+#define CORE_ALIGNED_FREE(allocator, ptr, align)     (void)(allocator)->realloc(allocator->m_Inst, ptr, 0, align, __FILE__, __LINE__)
+#define CORE_ALIGNED_REALLOC(allocator, ptr, align)  (allocator)->realloc(allocator->m_Inst, ptr, 0, align, __FILE__, __LINE__)
 
 typedef struct core_allocator_api
 {
