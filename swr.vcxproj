@@ -148,6 +148,7 @@
     <ClCompile Include="src\core\core.c" />
     <ClCompile Include="src\core\cpu.c" />
     <ClCompile Include="src\core\memory.c" />
+    <ClCompile Include="src\core\os_win32.c" />
     <ClCompile Include="src\core\string.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\swr\swr.c" />
@@ -162,9 +163,11 @@
     <ClInclude Include="src\core\allocator.h" />
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="src\core\cpu.h" />
+    <ClInclude Include="src\core\error.h" />
     <ClInclude Include="src\core\macros.h" />
     <ClInclude Include="src\core\math.h" />
     <ClInclude Include="src\core\memory.h" />
+    <ClInclude Include="src\core\os.h" />
     <ClInclude Include="src\core\string.h" />
     <ClInclude Include="src\swr\swr.h" />
   </ItemGroup>
@@ -173,6 +176,7 @@
     <None Include="src\core\inline\cpu.inl" />
     <None Include="src\core\inline\math.inl" />
     <None Include="src\core\inline\memory.inl" />
+    <None Include="src\core\inline\os.inl" />
     <None Include="src\core\inline\string.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -120,6 +120,31 @@ static inline char core_toupper(char ch)
 	return ch - (core_islower(ch) ? 0x20 : 0);
 }
 
+static inline uint32_t core_utf8to_utf16(uint16_t* dstUTF16, uint32_t dstMax, const char* srcUTF8, uint32_t srcSize)
+{
+	return str_api->utf8to_utf16(dstUTF16, dstMax, srcUTF8, srcSize);
+}
+
+static inline uint32_t core_utf8from_utf16(char* dstUTF8, uint32_t dstMax, const uint16_t* srcUTF16, uint32_t srcLen)
+{
+	return str_api->utf8from_utf16(dstUTF8, dstMax, srcUTF16, srcLen);
+}
+
+static inline uint32_t core_utf8from_utf32(char* dstUTF8, uint32_t dstMax, const uint32_t* srcUTF32, uint32_t srcLen)
+{
+	return str_api->utf8from_utf32(dstUTF8, dstMax, srcUTF32, srcLen);
+}
+
+static inline uint32_t core_utf8nlen(const char* str, uint32_t max)
+{
+	return str_api->utf8nlen(str, max);
+}
+
+static inline uint32_t core_utf8len(const char* str)
+{
+	return str_api->utf8nlen(str, UINT32_MAX);
+}
+
 #ifdef __cplusplus
 }
 #endif

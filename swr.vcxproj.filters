@@ -66,6 +66,9 @@
     <ClCompile Include="src\core\string.c">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\os_win32.c">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h">
@@ -110,6 +113,12 @@
     <ClInclude Include="src\core\math.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\os.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\error.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\memory.inl">
@@ -125,6 +134,9 @@
       <Filter>src\core\inline</Filter>
     </None>
     <None Include="src\core\inline\math.inl">
+      <Filter>src\core\inline</Filter>
+    </None>
+    <None Include="src\core\inline\os.inl">
       <Filter>src\core\inline</Filter>
     </None>
   </ItemGroup>

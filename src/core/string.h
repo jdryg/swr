@@ -23,6 +23,11 @@ typedef struct core_str_api
 	char*    (*strnrchr)(char* str, uint32_t n, char ch);
 	char*    (*strnchr)(char* str, uint32_t n, char ch);
 	uint32_t (*strncat)(char* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
+
+	uint32_t (*utf8to_utf16)(uint16_t* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
+	uint32_t (*utf8from_utf16)(char* dst, uint32_t dstMax, const uint16_t* src, uint32_t srcLen);
+	uint32_t (*utf8from_utf32)(char* dstUtf8, uint32_t dstMaxChars, const uint32_t* srcUtf32, uint32_t srcLen);
+	uint32_t (*utf8nlen)(const char* str, uint32_t max);
 } core_str_api;
 
 extern core_str_api* str_api;
@@ -50,6 +55,12 @@ static bool core_isdigit(char ch);
 static bool core_isspace(char ch);
 static char core_tolower(char ch);
 static char core_toupper(char ch);
+
+static uint32_t core_utf8to_utf16(uint16_t* dstUTF16, uint32_t dstMax, const char* srcUTF8, uint32_t srcSize);
+static uint32_t core_utf8from_utf16(char* dstUTF8, uint32_t dstMax, const uint16_t* srcUTF16, uint32_t srcLen);
+static uint32_t core_utf8from_utf32(char* dstUTF8, uint32_t dstMax, const uint32_t* srcUTF32, uint32_t srcLen);
+static uint32_t core_utf8nlen(const char* str, uint32_t max);
+static uint32_t core_utf8len(const char* str);
 
 #ifdef __cplusplus
 }
