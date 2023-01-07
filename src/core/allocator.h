@@ -32,8 +32,14 @@ typedef struct core_allocator_api
 
 extern core_allocator_api* allocator_api;
 
+static core_allocator_i* core_allocatorGetSystemAllocator(void);
+static core_allocator_i* core_allocatorCreateAllocator(const char* name);
+static void core_allocatorDestroyAllocator(core_allocator_i* allocator);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
 
 #endif // CORE_ALLOCATOR_H
+
+#include "inline/allocator.inl"

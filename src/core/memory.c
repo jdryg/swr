@@ -42,7 +42,7 @@ static void core_mem_move_ref(void* __restrict dstPtr, const void* __restrict sr
 	}
 
 	if (dst < src) {
-		core_memcpy(dstPtr, srcPtr, n);
+		core_memCopy(dstPtr, srcPtr, n);
 		return;
 	}
 

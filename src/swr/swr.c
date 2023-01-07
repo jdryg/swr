@@ -28,14 +28,14 @@ static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, ui
 		return NULL;
 	}
 
-	core_memset(ctx, 0, sizeof(swr_context));
+	core_memSet(ctx, 0, sizeof(swr_context));
 	ctx->m_FrameBuffer = (uint32_t*)CORE_ALIGNED_ALLOC(allocator, sizeof(uint32_t) * (size_t)w * (size_t)h, 16);
 	if (!ctx->m_FrameBuffer) {
 		swrDestroyContext(allocator, ctx);
 		return NULL;
 	}
 
-	core_memset(ctx->m_FrameBuffer, 0, sizeof(uint32_t) * (size_t)w * (size_t)h);
+	core_memSet(ctx->m_FrameBuffer, 0, sizeof(uint32_t) * (size_t)w * (size_t)h);
 	ctx->m_Width = w;
 	ctx->m_Height = h;
 

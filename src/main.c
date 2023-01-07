@@ -13,7 +13,7 @@ int32_t main(void)
 {
     coreInit(CORE_CPU_FEATURE_MASK_ALL);
 
-    core_allocator_i* allocator = allocator_api->createAllocator("app");
+    core_allocator_i* allocator = core_allocatorCreateAllocator("app");
 
 	struct mfb_window* window = mfb_open_ex("swr", kWinWidth, kWinHeight, 0);
 	if (!window) {
@@ -38,7 +38,7 @@ int32_t main(void)
     } while (mfb_wait_sync(window));
 
     swr->destroyContext(allocator, swrCtx);
-    allocator_api->destroyAllocator(allocator);
+    core_allocatorDestroyAllocator(allocator);
     coreShutdown();
 
 	return 0;

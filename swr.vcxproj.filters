@@ -22,6 +22,12 @@
     <Filter Include="src\core">
       <UniqueIdentifier>{ecff7b18-5704-4680-b3c9-16efb744f487}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\swr">
+      <UniqueIdentifier>{1e0e19b6-ea4e-4389-92fc-c50cbc9b426d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\core\inline">
+      <UniqueIdentifier>{18f70080-7afa-4e77-8e10-18d57b52ac61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -46,6 +52,12 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="src\core\cpu.c">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\swr\swr.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\memory.c">
       <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,5 +89,22 @@
     <ClInclude Include="src\core\macros.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\swr\swr.h">
+      <Filter>src\swr</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\memory.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\core\inline\memory.inl">
+      <Filter>src\core\inline</Filter>
+    </None>
+    <None Include="src\core\inline\cpu.inl">
+      <Filter>src\core\inline</Filter>
+    </None>
+    <None Include="src\core\inline\allocator.inl">
+      <Filter>src\core\inline</Filter>
+    </None>
   </ItemGroup>
 </Project>

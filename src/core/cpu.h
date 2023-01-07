@@ -75,8 +75,15 @@ typedef struct core_cpu_api
 
 extern core_cpu_api* cpu_api;
 
+static const char* core_cpuGetVendorID(void);
+static const char* core_cpuGetProcessorBrandString(void);
+static uint64_t core_cpuGetFeatures(void);
+static const core_cpu_version* core_cpuGetVersionInfo(void);
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif // CORE_CPU_H
+
+#include "inline/cpu.inl"

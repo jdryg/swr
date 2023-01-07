@@ -147,7 +147,9 @@
     <ClCompile Include="src\core\allocator.c" />
     <ClCompile Include="src\core\core.c" />
     <ClCompile Include="src\core\cpu.c" />
+    <ClCompile Include="src\core\memory.c" />
     <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\swr\swr.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h" />
@@ -159,6 +161,13 @@
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="src\core\cpu.h" />
     <ClInclude Include="src\core\macros.h" />
+    <ClInclude Include="src\core\memory.h" />
+    <ClInclude Include="src\swr\swr.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\core\inline\allocator.inl" />
+    <None Include="src\core\inline\cpu.inl" />
+    <None Include="src\core\inline\memory.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
