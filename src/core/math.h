@@ -12,6 +12,8 @@ static int32_t core_maxi32(int32_t a, int32_t b);
 static int32_t core_mini32(int32_t a, int32_t b);
 static int32_t core_max3i32(int32_t a, int32_t b, int32_t c);
 static int32_t core_min3i32(int32_t a, int32_t b, int32_t c);
+static int32_t core_roundDown(int32_t x, int32_t y);
+static int32_t core_roundUp(int32_t x, int32_t y);
 
 #ifdef __cplusplus
 }

@@ -27,10 +27,10 @@ int32_t main(void)
     }
 
     do {
-        swr->clear(swrCtx, SWR_COLOR_RED);
+        swr->clear(swrCtx, SWR_COLOR_BLACK);
+        swr->drawTriangle(swrCtx, 100, 100, 100, 400, 500, 400, SWR_COLOR_RED, SWR_COLOR_GREEN, SWR_COLOR_BLUE);
 
         const int32_t winState = mfb_update_ex(window, swrCtx->m_FrameBuffer, swrCtx->m_Width, swrCtx->m_Height);
-
         if (winState < 0) {
             window = NULL;
             break;

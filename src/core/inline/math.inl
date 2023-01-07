@@ -31,6 +31,16 @@ static int32_t core_min3i32(int32_t a, int32_t b, int32_t c)
 	return core_mini32(a, core_mini32(b, c));
 }
 
+static int32_t core_roundDown(int32_t x, int32_t y)
+{
+	return (x / y) * y;
+}
+
+static int32_t core_roundUp(int32_t x, int32_t y)
+{
+	return ((x / y) + ((x % y) != 0 ? 1 : 0)) * y;
+}
+
 #ifdef __cplusplus
 }
 #endif

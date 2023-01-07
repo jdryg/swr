@@ -3,6 +3,7 @@
 #include "../core/memory.h"
 #include "../core/string.h"
 #include "../core/math.h"
+#include "../core/cpu.h"
 #include <stdbool.h>
 
 static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, uint32_t h);
@@ -148,7 +149,18 @@ static void swrDrawText(swr_context* ctx, const swr_font* font, int32_t x0, int3
 	}
 }
 
+extern void swrDrawTriangleRef(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2);
+extern void swrDrawTriangleSSE2(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2);
+
 static void swrDrawTriangleDispatch(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
 {
-	// TODO: 
+	const uint64_t cpuFeatures = core_cpuGetFeatures();
+	if ((cpuFeatures & CORE_CPU_FEATURE_SSE2) != 0) {
+		swr->drawTriangle = swrDrawTriangleSSE2;
+	} else {
+		swr->drawTriangle = swrDrawTriangleRef;
+	}
+
+	// Call the new function
+	swr->drawTriangle(ctx, x0, y0, x1, y1, x2, y2, color0, color1, color2);
 }

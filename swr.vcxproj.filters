@@ -31,6 +31,9 @@
     <Filter Include="3rdparty\stb">
       <UniqueIdentifier>{ce2cd85e-43e8-4829-b29e-302279737d57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\swr\inline">
+      <UniqueIdentifier>{98c54f36-b6fe-4851-a8cf-44a57f66df46}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -68,6 +71,12 @@
     </ClCompile>
     <ClCompile Include="src\core\os_win32.c">
       <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\swr\swr_draw_triangle_ref.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\swr\swr_draw_triangle_sse2.c">
+      <Filter>src\swr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +128,9 @@
     <ClInclude Include="src\core\error.h">
       <Filter>src\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\swr\swr_vec_math.h">
+      <Filter>src\swr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\memory.inl">
@@ -138,6 +150,9 @@
     </None>
     <None Include="src\core\inline\os.inl">
       <Filter>src\core\inline</Filter>
+    </None>
+    <None Include="src\swr\inline\swr_vec_math_ref.inl">
+      <Filter>src\swr\inline</Filter>
     </None>
   </ItemGroup>
 </Project>

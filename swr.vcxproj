@@ -152,6 +152,8 @@
     <ClCompile Include="src\core\string.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\swr\swr.c" />
+    <ClCompile Include="src\swr\swr_draw_triangle_ref.c" />
+    <ClCompile Include="src\swr\swr_draw_triangle_sse2.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h" />
@@ -170,6 +172,7 @@
     <ClInclude Include="src\core\os.h" />
     <ClInclude Include="src\core\string.h" />
     <ClInclude Include="src\swr\swr.h" />
+    <ClInclude Include="src\swr\swr_vec_math.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\allocator.inl" />
@@ -178,6 +181,7 @@
     <None Include="src\core\inline\memory.inl" />
     <None Include="src\core\inline\os.inl" />
     <None Include="src\core\inline\string.inl" />
+    <None Include="src\swr\inline\swr_vec_math_ref.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

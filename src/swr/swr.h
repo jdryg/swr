@@ -5,6 +5,10 @@
 
 typedef struct core_allocator_i core_allocator_i;
 
+#ifndef SWR_CONFIG_DISABLE_PIXEL_SHADERS
+#define SWR_CONFIG_DISABLE_PIXEL_SHADERS 0
+#endif
+
 #define SWR_COLOR_FORMAT_RGBA 0
 #define SWR_COLOR_FORMAT_BGRA 1
 
