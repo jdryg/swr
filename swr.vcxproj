@@ -163,6 +163,7 @@
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="src\core\cpu.h" />
     <ClInclude Include="src\core\macros.h" />
+    <ClInclude Include="src\core\math.h" />
     <ClInclude Include="src\core\memory.h" />
     <ClInclude Include="src\core\string.h" />
     <ClInclude Include="src\swr\swr.h" />
@@ -170,6 +171,7 @@
   <ItemGroup>
     <None Include="src\core\inline\allocator.inl" />
     <None Include="src\core\inline\cpu.inl" />
+    <None Include="src\core\inline\math.inl" />
     <None Include="src\core\inline\memory.inl" />
     <None Include="src\core\inline\string.inl" />
   </ItemGroup>

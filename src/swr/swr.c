@@ -2,6 +2,7 @@
 #include "../core/allocator.h"
 #include "../core/memory.h"
 #include "../core/string.h"
+#include "../core/math.h"
 #include <stdbool.h>
 
 static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, uint32_t h);
@@ -63,14 +64,14 @@ static void swrDrawPixel(swr_context* ctx, int32_t x, int32_t y, uint32_t color)
 	if (x < 0 || x >= (int32_t)ctx->m_Width || y < 0 || y >= (int32_t)ctx->m_Height) {
 		return;
 	}
+
 	ctx->m_FrameBuffer[x + y * ctx->m_Width] = color;
 }
 
 static void swrDrawLine(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
 {
-#if 0
 	bool steep = false;
-	if (swr_absi(x0 - x1) < swr_absi(y0 - y1)) {
+	if (core_absi32(x0 - x1) < core_absi32(y0 - y1)) {
 		{ int32_t tmp = x0; x0 = y0; y0 = tmp; }
 		{ int32_t tmp = x1; x1 = y1; y1 = tmp; }
 		steep = true;
@@ -82,7 +83,7 @@ static void swrDrawLine(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 	}
 
 	const int32_t dx = x1 - x0;
-	const int32_t derror2 = swr_absi(y1 - y0) * 2;
+	const int32_t derror2 = core_absi32(y1 - y0) * 2;
 	const int32_t yinc = y1 > y0 ? 1 : -1;
 
 	int32_t error2 = 0;
@@ -109,7 +110,6 @@ static void swrDrawLine(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 			}
 		}
 	}
-#endif
 }
 
 static void swrDrawText(swr_context* ctx, const swr_font* font, int32_t x0, int32_t y0, const char* str, const char* end, uint32_t color)

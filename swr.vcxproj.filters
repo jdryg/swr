@@ -107,6 +107,9 @@
     <ClInclude Include="3rdparty\stb\stb_sprintf.h">
       <Filter>3rdparty\stb</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\math.h">
+      <Filter>src\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\memory.inl">
@@ -119,6 +122,9 @@
       <Filter>src\core\inline</Filter>
     </None>
     <None Include="src\core\inline\string.inl">
+      <Filter>src\core\inline</Filter>
+    </None>
+    <None Include="src\core\inline\math.inl">
       <Filter>src\core\inline</Filter>
     </None>
   </ItemGroup>
