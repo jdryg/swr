@@ -1,6 +1,7 @@
 #include "swr.h"
 #include "../core/allocator.h"
 #include "../core/memory.h"
+#include "../core/string.h"
 #include <stdbool.h>
 
 static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, uint32_t h);
@@ -115,7 +116,7 @@ static void swrDrawText(swr_context* ctx, const swr_font* font, int32_t x0, int3
 {
 	end = end != NULL
 		? end
-		: str + strlen(str)
+		: str + core_strlen(str)
 		;
 
 	const int32_t chw = (int32_t)font->m_CharWidth;

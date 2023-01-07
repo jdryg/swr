@@ -112,7 +112,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\minifb\include;$(SolutionDir)3rdparty\minifb\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\minifb\include;$(SolutionDir)3rdparty\minifb\src;$(SolutionDir)3rdparty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,7 +129,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\minifb\include;$(SolutionDir)3rdparty\minifb\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\minifb\include;$(SolutionDir)3rdparty\minifb\src;$(SolutionDir)3rdparty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,6 +148,7 @@
     <ClCompile Include="src\core\core.c" />
     <ClCompile Include="src\core\cpu.c" />
     <ClCompile Include="src\core\memory.c" />
+    <ClCompile Include="src\core\string.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\swr\swr.c" />
   </ItemGroup>
@@ -157,17 +158,20 @@
     <ClInclude Include="3rdparty\minifb\src\MiniFB_internal.h" />
     <ClInclude Include="3rdparty\minifb\src\WindowData.h" />
     <ClInclude Include="3rdparty\minifb\src\windows\WindowData_Win.h" />
+    <ClInclude Include="3rdparty\stb\stb_sprintf.h" />
     <ClInclude Include="src\core\allocator.h" />
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="src\core\cpu.h" />
     <ClInclude Include="src\core\macros.h" />
     <ClInclude Include="src\core\memory.h" />
+    <ClInclude Include="src\core\string.h" />
     <ClInclude Include="src\swr\swr.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\allocator.inl" />
     <None Include="src\core\inline\cpu.inl" />
     <None Include="src\core\inline\memory.inl" />
+    <None Include="src\core\inline\string.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
