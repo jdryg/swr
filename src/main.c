@@ -14,7 +14,7 @@ static const uint32_t kWinHeight = 720;
 
 int32_t main(void)
 {
-	coreInit(CORE_CPU_FEATURE_MASK_NONE);
+	coreInit(CORE_CPU_FEATURE_MASK_ALL);
 
 	core_allocator_i* allocator = core_allocatorCreateAllocator("app");
 

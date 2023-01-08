@@ -140,6 +140,9 @@
     <ClInclude Include="src\fonts\font8x8_basic.h">
       <Filter>src\fonts</Filter>
     </ClInclude>
+    <ClInclude Include="src\swr\inline\swr_vec_math_sse2.inl">
+      <Filter>src\swr\inline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\memory.inl">

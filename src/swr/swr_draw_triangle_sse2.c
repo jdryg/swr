@@ -1,7 +1,7 @@
 #include "swr.h"
 #include "../core/math.h"
 
-//#define SWR_VEC_MATH_SSE2
+#define SWR_VEC_MATH_SSE2
 #include "swr_vec_math.h"
 
 typedef struct swr_edge

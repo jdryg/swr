@@ -34,7 +34,7 @@ typedef struct vec4f
 
 typedef struct vec4i
 {
-#if defined(SWR_VEC_MATH_SSE)
+#if defined(SWR_VEC_MATH_SSE2)
 	__m128i m_IMM;
 #else
 	int32_t m_Elem[4];
