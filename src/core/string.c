@@ -4,35 +4,35 @@
 #define STB_SPRINTF_IMPLEMENTATION
 #include <stb_sprintf.h>
 
-static uint32_t core_str_strnlen(const char* str, uint32_t max);
-static char* core_str_strndup(const char* str, uint32_t n, core_allocator_i* allocator);
-static uint32_t core_str_strcpy(char* dst, uint32_t dstSize, const char* src, uint32_t n);
-static int32_t core_str_strcmp(const char* lhs, uint32_t lhsMax, const char* rhs, uint32_t rhsMax);
-static char* core_str_strnrchr(char* str, uint32_t n, char ch);
-static char* core_str_strnchr(char* str, uint32_t n, char ch);
-static uint32_t core_str_strncat(char* dst, uint32_t dstSize, const char* src, uint32_t n);
-static uint32_t core_str_utf8ToUtf16(uint16_t* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
-static uint32_t core_str_utf8FromUtf16(char* dst, uint32_t dstMax, const uint16_t* src, uint32_t srcLen);
-static uint32_t core_str_utf8FromUtf32(char* dst, uint32_t dstMax, const uint32_t* src, uint32_t srcLen);
-static uint32_t core_str_utf8nlen(const char* str, uint32_t max);
+static uint32_t str_strnlen(const char* str, uint32_t max);
+static char* str_strndup(const char* str, uint32_t n, core_allocator_i* allocator);
+static uint32_t str_strcpy(char* dst, uint32_t dstSize, const char* src, uint32_t n);
+static int32_t str_strcmp(const char* lhs, uint32_t lhsMax, const char* rhs, uint32_t rhsMax);
+static char* str_strnrchr(char* str, uint32_t n, char ch);
+static char* str_strnchr(char* str, uint32_t n, char ch);
+static uint32_t str_strncat(char* dst, uint32_t dstSize, const char* src, uint32_t n);
+static uint32_t str_utf8ToUtf16(uint16_t* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
+static uint32_t str_utf8FromUtf16(char* dst, uint32_t dstMax, const uint16_t* src, uint32_t srcLen);
+static uint32_t str_utf8FromUtf32(char* dst, uint32_t dstMax, const uint32_t* src, uint32_t srcLen);
+static uint32_t str_utf8nlen(const char* str, uint32_t max);
 
 core_str_api* str_api = &(core_str_api){
 	.snprintf = stbsp_snprintf,
 	.vsnprintf = stbsp_vsnprintf,
-	.strnlen = core_str_strnlen,
-	.strndup = core_str_strndup,
-	.strcpy = core_str_strcpy,
-	.strcmp = core_str_strcmp,
-	.strnrchr = core_str_strnrchr,
-	.strnchr = core_str_strnchr,
-	.strncat = core_str_strncat,
-	.utf8to_utf16 = core_str_utf8ToUtf16,
-	.utf8from_utf16 = core_str_utf8FromUtf16,
-	.utf8from_utf32 = core_str_utf8FromUtf32,
-	.utf8nlen = core_str_utf8nlen
+	.strnlen = str_strnlen,
+	.strndup = str_strndup,
+	.strcpy = str_strcpy,
+	.strcmp = str_strcmp,
+	.strnrchr = str_strnrchr,
+	.strnchr = str_strnchr,
+	.strncat = str_strncat,
+	.utf8to_utf16 = str_utf8ToUtf16,
+	.utf8from_utf16 = str_utf8FromUtf16,
+	.utf8from_utf32 = str_utf8FromUtf32,
+	.utf8nlen = str_utf8nlen
 };
 
-static uint32_t core_str_strnlen(const char* str, uint32_t max)
+static uint32_t str_strnlen(const char* str, uint32_t max)
 {
 	const char* ptr = str;
 	if (ptr != NULL) {
@@ -41,7 +41,7 @@ static uint32_t core_str_strnlen(const char* str, uint32_t max)
 	return (uint32_t)(ptr - str);
 }
 
-static char* core_str_strndup(const char* str, uint32_t n, core_allocator_i* allocator)
+static char* str_strndup(const char* str, uint32_t n, core_allocator_i* allocator)
 {
 	const uint32_t len = core_strnlen(str, n);
 	char* dst = (char*)CORE_ALLOC(allocator, len + 1);
@@ -51,7 +51,7 @@ static char* core_str_strndup(const char* str, uint32_t n, core_allocator_i* all
 	return dst;
 }
 
-static uint32_t core_str_strcpy(char* dst, uint32_t dstSize, const char* src, uint32_t n)
+static uint32_t str_strcpy(char* dst, uint32_t dstSize, const char* src, uint32_t n)
 {
 	const uint32_t len = core_strnlen(src, n);
 	const uint32_t max = dstSize - 1;
@@ -62,7 +62,7 @@ static uint32_t core_str_strcpy(char* dst, uint32_t dstSize, const char* src, ui
 	return num;
 }
 
-static int32_t core_str_strcmp(const char* lhs, uint32_t lhsMax, const char* rhs, uint32_t rhsMax)
+static int32_t str_strcmp(const char* lhs, uint32_t lhsMax, const char* rhs, uint32_t rhsMax)
 {
 	uint32_t max = lhsMax < rhsMax ? lhsMax : rhsMax;
 	for (; max > 0 && *lhs == *rhs && *lhs != '\0'; ++lhs, ++rhs, --max);
@@ -77,7 +77,7 @@ static int32_t core_str_strcmp(const char* lhs, uint32_t lhsMax, const char* rhs
 	return *lhs - *rhs;
 }
 
-static char* core_str_strnrchr(char* str, uint32_t n, char ch)
+static char* str_strnrchr(char* str, uint32_t n, char ch)
 {
 	if (n == UINT32_MAX) {
 		char* lastOccurence = NULL;
@@ -99,7 +99,7 @@ static char* core_str_strnrchr(char* str, uint32_t n, char ch)
 	return NULL;
 }
 
-static char* core_str_strnchr(char* str, uint32_t n, char ch)
+static char* str_strnchr(char* str, uint32_t n, char ch)
 {
 	for (; n > 0 && *str != '\0'; ++str, --n) {
 		if (*str == ch) {
@@ -110,7 +110,7 @@ static char* core_str_strnchr(char* str, uint32_t n, char ch)
 	return NULL;
 }
 
-static uint32_t core_str_strncat(char* dst, uint32_t dstSize, const char* src, uint32_t n)
+static uint32_t str_strncat(char* dst, uint32_t dstSize, const char* src, uint32_t n)
 {
 	const uint32_t max = dstSize;
 	const uint32_t len = core_strnlen(dst, dstSize);
@@ -130,7 +130,7 @@ static char* utf8FromCodepoint(uint32_t cp, char* dst, uint32_t* dstSize);
 static const uint16_t* utf16ToCodepoint(const uint16_t* str, uint32_t* cp);
 static uint16_t* utf16FromCodepoint(uint32_t cp, uint16_t* dst, uint32_t* dstSize);
 
-static uint32_t core_str_utf8ToUtf16(uint16_t* dstUtf16, uint32_t dstMaxChars, const char* srcUtf8, uint32_t srcLen)
+static uint32_t str_utf8ToUtf16(uint16_t* dstUtf16, uint32_t dstMaxChars, const char* srcUtf8, uint32_t srcLen)
 {
 	if (dstMaxChars == 0) {
 		return 0;
@@ -159,7 +159,7 @@ static uint32_t core_str_utf8ToUtf16(uint16_t* dstUtf16, uint32_t dstMaxChars, c
 	return (uint32_t)(dst - dstUtf16);
 }
 
-static uint32_t core_str_utf8FromUtf16(char* dstUtf8, uint32_t dstMaxChars, const uint16_t* srcUtf16, uint32_t srcLen)
+static uint32_t str_utf8FromUtf16(char* dstUtf8, uint32_t dstMaxChars, const uint16_t* srcUtf16, uint32_t srcLen)
 {
 	if (dstMaxChars == 0) {
 		return 0;
@@ -188,7 +188,7 @@ static uint32_t core_str_utf8FromUtf16(char* dstUtf8, uint32_t dstMaxChars, cons
 	return (uint32_t)(dst - dstUtf8);
 }
 
-static uint32_t core_str_utf8FromUtf32(char* dstUtf8, uint32_t dstMaxChars, const uint32_t* srcUtf32, uint32_t srcLen)
+static uint32_t str_utf8FromUtf32(char* dstUtf8, uint32_t dstMaxChars, const uint32_t* srcUtf32, uint32_t srcLen)
 {
 	if (dstMaxChars == 0) {
 		return 0;
@@ -216,7 +216,7 @@ static uint32_t core_str_utf8FromUtf32(char* dstUtf8, uint32_t dstMaxChars, cons
 	return (uint32_t)(dst - dstUtf8);
 }
 
-static uint32_t core_str_utf8nlen(const char* str, uint32_t max)
+static uint32_t str_utf8nlen(const char* str, uint32_t max)
 {
 	uint32_t n = 0;
 

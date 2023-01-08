@@ -2,26 +2,26 @@
 #include <stdbool.h>
 #include <malloc.h>
 
-static void* core_allocator_sysRealloc(core_allocator_o* a, void* ptr, uint64_t sz, uint64_t align, const char* file, uint32_t line);
-static core_allocator_i* core_allocator_createAllocator(const char* name);
-static void core_allocator_destroyAllocator(core_allocator_i* alloc);
+static void* allocator_sysRealloc(core_allocator_o* a, void* ptr, uint64_t sz, uint64_t align, const char* file, uint32_t line);
+static core_allocator_i* allocator_createAllocator(const char* name);
+static void allocator_destroyAllocator(core_allocator_i* alloc);
 
 static const uint64_t kSystemAllocatorNaturalAlignment = 8;
 
 static core_allocator_i g_SystemAllocator = {
 	.m_Inst = NULL,
-	.realloc = core_allocator_sysRealloc
+	.realloc = allocator_sysRealloc
 };
 
 core_allocator_api* allocator_api = &(core_allocator_api){
 	.m_SystemAllocator = NULL,
-	.createAllocator = core_allocator_createAllocator,
-	.destroyAllocator = core_allocator_destroyAllocator
+	.createAllocator = allocator_createAllocator,
+	.destroyAllocator = allocator_destroyAllocator
 };
 
 bool core_allocator_initAPI(void)
 {
-	allocator_api->m_SystemAllocator = core_allocator_createAllocator("system");
+	allocator_api->m_SystemAllocator = allocator_createAllocator("system");
 	if (!allocator_api->m_SystemAllocator) {
 		return false;
 	}
@@ -32,7 +32,7 @@ bool core_allocator_initAPI(void)
 void core_allocator_shutdownAPI(void)
 {
 	if (allocator_api->m_SystemAllocator) {
-		core_allocator_destroyAllocator(allocator_api->m_SystemAllocator);
+		allocator_destroyAllocator(allocator_api->m_SystemAllocator);
 		allocator_api->m_SystemAllocator = NULL;
 	}
 }
@@ -41,7 +41,7 @@ void core_allocator_shutdownAPI(void)
 // Internal API
 //
 // bx::DefaultAllocator::realloc
-static void* core_allocator_sysRealloc(core_allocator_o* allocator, void* ptr, uint64_t sz, uint64_t align, const char* file, uint32_t line)
+static void* allocator_sysRealloc(core_allocator_o* allocator, void* ptr, uint64_t sz, uint64_t align, const char* file, uint32_t line)
 {
 	if (sz == 0) {
 		if (ptr != NULL) {
@@ -66,7 +66,7 @@ static void* core_allocator_sysRealloc(core_allocator_o* allocator, void* ptr, u
 		;
 }
 
-static core_allocator_i* core_allocator_createAllocator(const char* name)
+static core_allocator_i* allocator_createAllocator(const char* name)
 {
 	core_allocator_i* allocator = NULL;
 
@@ -79,7 +79,7 @@ static core_allocator_i* core_allocator_createAllocator(const char* name)
 	return allocator;
 }
 
-static void core_allocator_destroyAllocator(core_allocator_i* allocator)
+static void allocator_destroyAllocator(core_allocator_i* allocator)
 {
 #if JX_CONFIG_TRACE_ALLOCATIONS
 	// TODO: Destroy tracing allocator

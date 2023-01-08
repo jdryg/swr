@@ -184,18 +184,18 @@ typedef struct core_cpu_info
 
 static core_cpu_info s_CPUInfo = { 0 };
 
-static const char* core_cpu_getVendorID(void);
-static const char* core_cpu_getProcessorBrandString(void);
-static uint64_t core_cpu_getFeatures(void);
-static const core_cpu_version* core_cpu_getVersion(void);
-static uint32_t core_cpu_readInfo(uint32_t id);
+static const char* cpu_getVendorID(void);
+static const char* cpu_getProcessorBrandString(void);
+static uint64_t cpu_getFeatures(void);
+static const core_cpu_version* cpu_getVersion(void);
+static uint32_t cpu_readInfo(uint32_t id);
 
 core_cpu_api* cpu_api = &(core_cpu_api)
 {
-	.getVendorID = core_cpu_getVendorID,
-	.getProcessorBrandString = core_cpu_getProcessorBrandString,
-	.getFeatures = core_cpu_getFeatures,
-	.getVersionInfo = core_cpu_getVersion
+	.getVendorID = cpu_getVendorID,
+	.getProcessorBrandString = cpu_getProcessorBrandString,
+	.getFeatures = cpu_getFeatures,
+	.getVersionInfo = cpu_getVersion
 };
 
 bool core_cpu_initAPI(uint64_t featureMask)
@@ -226,9 +226,9 @@ bool core_cpu_initAPI(uint64_t featureMask)
 	// Vendor ID
 	{
 		char* str = &info->m_VendorID[0];
-		*(uint32_t*)&str[0] = core_cpu_readInfo(CPUINFO_BASIC_VENDOR_ID_0);
-		*(uint32_t*)&str[4] = core_cpu_readInfo(CPUINFO_BASIC_VENDOR_ID_1);
-		*(uint32_t*)&str[8] = core_cpu_readInfo(CPUINFO_BASIC_VENDOR_ID_2);
+		*(uint32_t*)&str[0] = cpu_readInfo(CPUINFO_BASIC_VENDOR_ID_0);
+		*(uint32_t*)&str[4] = cpu_readInfo(CPUINFO_BASIC_VENDOR_ID_1);
+		*(uint32_t*)&str[8] = cpu_readInfo(CPUINFO_BASIC_VENDOR_ID_2);
 		str[12] = '\0';
 	}
 
@@ -236,28 +236,28 @@ bool core_cpu_initAPI(uint64_t featureMask)
 	{
 		char* str = &info->m_ProcessorBrandString[0];
 
-		const uint32_t maxExtendedFuncID = core_cpu_readInfo(CPUINFO_EXT_MAX_EXTENDED_FUNC_ID);
+		const uint32_t maxExtendedFuncID = cpu_readInfo(CPUINFO_EXT_MAX_EXTENDED_FUNC_ID);
 		if (maxExtendedFuncID >= 0x80000004) {
 			// If the CPUID.80000000h.EAX is greater then or equal to 0x80000004 the 
 			// Brand String feature is supported and software should use CPUID functions
 			// 0x80000002 through 0x80000004 to identify the processor.
-			*(uint32_t*)&str[0] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_0);
-			*(uint32_t*)&str[4] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_1);
-			*(uint32_t*)&str[8] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_2);
-			*(uint32_t*)&str[12] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_3);
-			*(uint32_t*)&str[16] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_4);
-			*(uint32_t*)&str[20] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_5);
-			*(uint32_t*)&str[24] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_6);
-			*(uint32_t*)&str[28] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_7);
-			*(uint32_t*)&str[32] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_8);
-			*(uint32_t*)&str[36] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_9);
-			*(uint32_t*)&str[40] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_10);
-			*(uint32_t*)&str[44] = core_cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_11);
+			*(uint32_t*)&str[0] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_0);
+			*(uint32_t*)&str[4] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_1);
+			*(uint32_t*)&str[8] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_2);
+			*(uint32_t*)&str[12] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_3);
+			*(uint32_t*)&str[16] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_4);
+			*(uint32_t*)&str[20] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_5);
+			*(uint32_t*)&str[24] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_6);
+			*(uint32_t*)&str[28] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_7);
+			*(uint32_t*)&str[32] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_8);
+			*(uint32_t*)&str[36] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_9);
+			*(uint32_t*)&str[40] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_10);
+			*(uint32_t*)&str[44] = cpu_readInfo(CPUINFO_EXT_PROCESSOR_BRAND_STRING_11);
 			str[48] = '\0';
 		} else {
 			// If the Brand String feature is not supported execute CPUID.1.EBX to get
 			// the Brand ID. If the Brand ID is not zero the brand id feature is supported.
-			const uint32_t brandID = core_cpu_readInfo(CPUINFO_BASIC_BRAND_INDEX);
+			const uint32_t brandID = cpu_readInfo(CPUINFO_BASIC_BRAND_INDEX);
 			if (brandID != 0) {
 				// NOTE: Since Brand ID is going to be different between vendors, don't try
 				// to decode it. Just write the Brand ID to the processor brand string.
@@ -268,7 +268,7 @@ bool core_cpu_initAPI(uint64_t featureMask)
 				// identify the processor.
 #if 0
 				// TODO:
-				const uint32_t processorSignature = core_cpu_readInfo(CPUINFO_BASIC_PROCESSOR_SIGNATURE);
+				const uint32_t processorSignature = cpu_readInfo(CPUINFO_BASIC_PROCESSOR_SIGNATURE);
 #endif
 			}
 		}
@@ -277,40 +277,40 @@ bool core_cpu_initAPI(uint64_t featureMask)
 	// Version
 	{
 		core_cpu_version* ver = &info->m_Version;
-		ver->m_SteppingID = (uint8_t)core_cpu_readInfo(CPUINFO_BASIC_STEPPING_ID);
+		ver->m_SteppingID = (uint8_t)cpu_readInfo(CPUINFO_BASIC_STEPPING_ID);
 
-		const uint8_t familyID = (uint8_t)core_cpu_readInfo(CPUINFO_BASIC_FAMILY_ID);
+		const uint8_t familyID = (uint8_t)cpu_readInfo(CPUINFO_BASIC_FAMILY_ID);
 		if (familyID == 0x0F) {
-			ver->m_FamilyID = familyID + (uint8_t)core_cpu_readInfo(CPUINFO_BASIC_EXTENDED_FAMILY_ID);
+			ver->m_FamilyID = familyID + (uint8_t)cpu_readInfo(CPUINFO_BASIC_EXTENDED_FAMILY_ID);
 		} else {
 			ver->m_FamilyID = familyID;
 		}
 
-		ver->m_ModelID = (uint8_t)core_cpu_readInfo(CPUINFO_BASIC_MODEL_ID);
+		ver->m_ModelID = (uint8_t)cpu_readInfo(CPUINFO_BASIC_MODEL_ID);
 		if (familyID == 0x06 || familyID == 0x0F) {
-			ver->m_ModelID += (uint8_t)core_cpu_readInfo(CPUINFO_BASIC_EXTENDED_MODEL_ID) << 4;
+			ver->m_ModelID += (uint8_t)cpu_readInfo(CPUINFO_BASIC_EXTENDED_MODEL_ID) << 4;
 		}
 	}
 
 	// Features
 	{
 		uint64_t features = 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_MMX) != 0) ? CORE_CPU_FEATURE_MMX : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_SSE) != 0) ? CORE_CPU_FEATURE_SSE : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_SSE2) != 0) ? CORE_CPU_FEATURE_SSE2 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_SSE3) != 0) ? CORE_CPU_FEATURE_SSE3 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_SSSE3) != 0) ? CORE_CPU_FEATURE_SSSE3 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_SSE4_1) != 0) ? CORE_CPU_FEATURE_SSE4_1 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_SSE4_2) != 0) ? CORE_CPU_FEATURE_SSE4_2 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_AVX) != 0) ? CORE_CPU_FEATURE_AVX : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_AVX2) != 0) ? CORE_CPU_FEATURE_AVX2 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_AVX512F) != 0) ? CORE_CPU_FEATURE_AVX512F : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_BMI1) != 0) ? CORE_CPU_FEATURE_BMI1 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_BMI2) != 0) ? CORE_CPU_FEATURE_BMI2 : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_POPCNT) != 0) ? CORE_CPU_FEATURE_POPCNT : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_F16C) != 0) ? CORE_CPU_FEATURE_F16C : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_FMA) != 0) ? CORE_CPU_FEATURE_FMA : 0ull;
-		features |= (core_cpu_readInfo(CPUINFO_BASIC_ENHANCED_REPMOVSB) != 0) ? CORE_CPU_FEATURE_ERMSB : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_MMX) != 0) ? CORE_CPU_FEATURE_MMX : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_SSE) != 0) ? CORE_CPU_FEATURE_SSE : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_SSE2) != 0) ? CORE_CPU_FEATURE_SSE2 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_SSE3) != 0) ? CORE_CPU_FEATURE_SSE3 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_SSSE3) != 0) ? CORE_CPU_FEATURE_SSSE3 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_SSE4_1) != 0) ? CORE_CPU_FEATURE_SSE4_1 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_SSE4_2) != 0) ? CORE_CPU_FEATURE_SSE4_2 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_AVX) != 0) ? CORE_CPU_FEATURE_AVX : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_AVX2) != 0) ? CORE_CPU_FEATURE_AVX2 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_AVX512F) != 0) ? CORE_CPU_FEATURE_AVX512F : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_BMI1) != 0) ? CORE_CPU_FEATURE_BMI1 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_BMI2) != 0) ? CORE_CPU_FEATURE_BMI2 : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_POPCNT) != 0) ? CORE_CPU_FEATURE_POPCNT : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_F16C) != 0) ? CORE_CPU_FEATURE_F16C : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_FMA) != 0) ? CORE_CPU_FEATURE_FMA : 0ull;
+		features |= (cpu_readInfo(CPUINFO_BASIC_ENHANCED_REPMOVSB) != 0) ? CORE_CPU_FEATURE_ERMSB : 0ull;
 		info->m_Features = (features & featureMask);
 	}
 
@@ -322,27 +322,27 @@ void core_cpu_shutdownAPI(void)
 
 }
 
-static const char* core_cpu_getVendorID(void)
+static const char* cpu_getVendorID(void)
 {
 	return &s_CPUInfo.m_VendorID[0];
 }
 
-static const char* core_cpu_getProcessorBrandString(void)
+static const char* cpu_getProcessorBrandString(void)
 {
 	return &s_CPUInfo.m_ProcessorBrandString[0];
 }
 
-static uint64_t core_cpu_getFeatures(void)
+static uint64_t cpu_getFeatures(void)
 {
 	return s_CPUInfo.m_Features;
 }
 
-static const core_cpu_version* core_cpu_getVersion(void)
+static const core_cpu_version* cpu_getVersion(void)
 {
 	return &s_CPUInfo.m_Version;
 }
 
-static uint32_t core_cpu_readInfo(uint32_t id)
+static uint32_t cpu_readInfo(uint32_t id)
 {
 	const uint32_t cpuidEAX = (id >> 0) & 0xFF;
 	const uint32_t cpuidECX = (id >> 8) & 0xFF;

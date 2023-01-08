@@ -1,15 +1,15 @@
 #include "memory.h"
 
-static void core_mem_copy_ref(void* __restrict dst, const void* __restrict src, size_t n);
-static void core_mem_move_ref(void* __restrict dst, const void* __restrict src, size_t n);
-static void core_mem_set_ref(void* dst, uint8_t ch, size_t n);
-static int32_t core_mem_cmp_ref(const void* __restrict lhs, const void* __restrict rhs, size_t n);
+static void mem_copy_ref(void* __restrict dst, const void* __restrict src, size_t n);
+static void mem_move_ref(void* __restrict dst, const void* __restrict src, size_t n);
+static void mem_set_ref(void* dst, uint8_t ch, size_t n);
+static int32_t mem_cmp_ref(const void* __restrict lhs, const void* __restrict rhs, size_t n);
 
 core_mem_api* mem_api = &(core_mem_api){
-	.copy = core_mem_copy_ref,
-	.move = core_mem_move_ref,
-	.set = core_mem_set_ref,
-	.cmp = core_mem_cmp_ref
+	.copy = mem_copy_ref,
+	.move = mem_move_ref,
+	.set = mem_set_ref,
+	.cmp = mem_cmp_ref
 };
 
 bool core_mem_initAPI(void)
@@ -22,7 +22,7 @@ void core_mem_shutdownAPI(void)
 
 }
 
-static void core_mem_copy_ref(void* __restrict dstPtr, const void* __restrict srcPtr, size_t n)
+static void mem_copy_ref(void* __restrict dstPtr, const void* __restrict srcPtr, size_t n)
 {
 	uint8_t* dst = (uint8_t*)dstPtr;
 	const uint8_t* src = (uint8_t*)srcPtr;
@@ -32,7 +32,7 @@ static void core_mem_copy_ref(void* __restrict dstPtr, const void* __restrict sr
 	}
 }
 
-static void core_mem_move_ref(void* __restrict dstPtr, const void* __restrict srcPtr, size_t n)
+static void mem_move_ref(void* __restrict dstPtr, const void* __restrict srcPtr, size_t n)
 {
 	uint8_t* dst = (uint8_t*)dstPtr;
 	const uint8_t* src = (const uint8_t*)srcPtr;
@@ -51,7 +51,7 @@ static void core_mem_move_ref(void* __restrict dstPtr, const void* __restrict sr
 	}
 }
 
-static void core_mem_set_ref(void* dstPtr, uint8_t ch, size_t n)
+static void mem_set_ref(void* dstPtr, uint8_t ch, size_t n)
 {
 	uint8_t* dst = (uint8_t*)dstPtr;
 	const uint8_t* end = dst + n;
@@ -60,7 +60,7 @@ static void core_mem_set_ref(void* dstPtr, uint8_t ch, size_t n)
 	}
 }
 
-static int32_t core_mem_cmp_ref(const void* __restrict lhsPtr, const void* __restrict rhsPtr, size_t n)
+static int32_t mem_cmp_ref(const void* __restrict lhsPtr, const void* __restrict rhsPtr, size_t n)
 {
 	if (lhsPtr == rhsPtr) {
 		return 0;
