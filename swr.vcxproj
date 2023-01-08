@@ -147,6 +147,7 @@
     <ClCompile Include="src\core\allocator.c" />
     <ClCompile Include="src\core\core.c" />
     <ClCompile Include="src\core\cpu.c" />
+    <ClCompile Include="src\core\math.c" />
     <ClCompile Include="src\core\memory.c" />
     <ClCompile Include="src\core\os_win32.c" />
     <ClCompile Include="src\core\string.c" />
@@ -171,6 +172,7 @@
     <ClInclude Include="src\core\memory.h" />
     <ClInclude Include="src\core\os.h" />
     <ClInclude Include="src\core\string.h" />
+    <ClInclude Include="src\fonts\font8x8_basic.h" />
     <ClInclude Include="src\swr\swr.h" />
     <ClInclude Include="src\swr\swr_vec_math.h" />
   </ItemGroup>

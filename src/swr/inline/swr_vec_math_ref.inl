@@ -92,8 +92,25 @@ static inline vec4f vec4f_mul(vec4f a, vec4f b)
 	};
 }
 
-static vec4f vec4f_floor(vec4f x);
-static vec4f vec4f_ceil(vec4f x);
+static vec4f vec4f_floor(vec4f x)
+{
+	return (vec4f){
+		.m_Elem[0] = core_floorf(x.m_Elem[0]),
+		.m_Elem[1] = core_floorf(x.m_Elem[1]),
+		.m_Elem[2] = core_floorf(x.m_Elem[2]),
+		.m_Elem[3] = core_floorf(x.m_Elem[3]),
+	};
+}
+
+static vec4f vec4f_ceil(vec4f x)
+{
+	return (vec4f){
+		.m_Elem[0] = core_ceilf(x.m_Elem[0]),
+		.m_Elem[1] = core_ceilf(x.m_Elem[1]),
+		.m_Elem[2] = core_ceilf(x.m_Elem[2]),
+		.m_Elem[3] = core_ceilf(x.m_Elem[3]),
+	};
+}
 
 static inline vec4f vec4f_madd(vec4f a, vec4f b, vec4f c)
 {

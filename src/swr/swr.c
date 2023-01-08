@@ -154,12 +154,16 @@ extern void swrDrawTriangleSSE2(swr_context* ctx, int32_t x0, int32_t y0, int32_
 
 static void swrDrawTriangleDispatch(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
 {
+#if 1
 	const uint64_t cpuFeatures = core_cpuGetFeatures();
 	if ((cpuFeatures & CORE_CPU_FEATURE_SSE2) != 0) {
 		swr->drawTriangle = swrDrawTriangleSSE2;
 	} else {
 		swr->drawTriangle = swrDrawTriangleRef;
 	}
+#else
+	swr->drawTriangle = swrDrawTriangleRef;
+#endif
 
 	// Call the new function
 	swr->drawTriangle(ctx, x0, y0, x1, y1, x2, y2, color0, color1, color2);

@@ -34,6 +34,9 @@
     <Filter Include="src\swr\inline">
       <UniqueIdentifier>{98c54f36-b6fe-4851-a8cf-44a57f66df46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\fonts">
+      <UniqueIdentifier>{f2e0856f-9164-487c-afe2-cae176a0631d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.c">
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="src\swr\swr_draw_triangle_sse2.c">
       <Filter>src\swr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\math.c">
+      <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="src\swr\swr_vec_math.h">
       <Filter>src\swr</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fonts\font8x8_basic.h">
+      <Filter>src\fonts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

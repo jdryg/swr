@@ -55,7 +55,7 @@ void swrDrawTriangleRef(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 	const int32_t bboxHeight = maxY - minY;
 
 	// Prepare interpolated attributes
-#if !SWR_CONFIG_NO_PIXEL_SHADER
+#if !SWR_CONFIG_DISABLE_PIXEL_SHADERS
 	const uint32_t c0r = (color0 & SWR_COLOR_RED_Msk) >> SWR_COLOR_RED_Pos;
 	const uint32_t c0g = (color0 & SWR_COLOR_GREEN_Msk) >> SWR_COLOR_GREEN_Pos;
 	const uint32_t c0b = (color0 & SWR_COLOR_BLUE_Msk) >> SWR_COLOR_BLUE_Pos;
@@ -87,7 +87,7 @@ void swrDrawTriangleRef(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 	const int32_t w2_pmin = swr_edgeEval(edge2, minX, minY);
 
 	// Barycentric coordinate normalization
-#if !SWR_CONFIG_NO_PIXEL_SHADER
+#if !SWR_CONFIG_DISABLE_PIXEL_SHADERS
 	const float inv_area = 1.0f / (float)iarea;
 #endif
 
@@ -153,7 +153,7 @@ void swrDrawTriangleRef(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 			{
 				assert(w0 >= 0 && w1 >= 0 && w2 >= 0);
 
-#if SWR_CONFIG_NO_PIXEL_SHADER
+#if SWR_CONFIG_DISABLE_PIXEL_SHADERS
 				const uint32_t rgba = 0xFFFFFFFF;
 #else
 				const float l0 = (float)w0 * inv_area;

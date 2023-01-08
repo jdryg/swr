@@ -6,7 +6,7 @@
 typedef struct core_allocator_i core_allocator_i;
 
 #ifndef SWR_CONFIG_DISABLE_PIXEL_SHADERS
-#define SWR_CONFIG_DISABLE_PIXEL_SHADERS 0
+#define SWR_CONFIG_DISABLE_PIXEL_SHADERS 1
 #endif
 
 #define SWR_COLOR_FORMAT_RGBA 0
@@ -47,7 +47,7 @@ typedef struct core_allocator_i core_allocator_i;
 
 typedef struct swr_font
 {
-	uint8_t* m_CharData;
+	const uint8_t* m_CharData;
 	uint32_t m_CharWidth;
 	uint32_t m_CharHeight;
 	uint8_t m_CharMin;
