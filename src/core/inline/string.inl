@@ -85,6 +85,21 @@ static inline uint32_t core_strncat(char* dst, uint32_t dstMax, const char* src,
 	return str_api->strncat(dst, dstMax, src, srcLen);
 }
 
+static int32_t core_strToInt(const char* str, char** endPtr, int32_t base)
+{
+	return str_api->strTo_int(str, endPtr, base);
+}
+
+static float core_strToFloat(const char* str, char** endPtr)
+{
+	return (float)str_api->strTo_double(str, endPtr);
+}
+
+static double core_strToDouble(const char* str, char** endPtr)
+{
+	return str_api->strTo_double(str, endPtr);
+}
+
 static inline bool core_isupper(char ch)
 {
 	return ((uint32_t)ch - 'A') < 26;

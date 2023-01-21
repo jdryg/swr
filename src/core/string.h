@@ -24,6 +24,9 @@ typedef struct core_str_api
 	char*    (*strnchr)(char* str, uint32_t n, char ch);
 	uint32_t (*strncat)(char* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
 
+	int32_t (*strTo_int)(const char* str, char** endPtr, int32_t base);
+	double (*strTo_double)(const char* str, char** endPtr);
+
 	uint32_t (*utf8to_utf16)(uint16_t* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
 	uint32_t (*utf8from_utf16)(char* dst, uint32_t dstMax, const uint16_t* src, uint32_t srcLen);
 	uint32_t (*utf8from_utf32)(char* dstUtf8, uint32_t dstMaxChars, const uint32_t* srcUtf32, uint32_t srcLen);
@@ -47,6 +50,10 @@ static char* core_strnchr(char* str, uint32_t n, char ch);
 static char* core_strchr(char* str, char ch);
 static uint32_t core_strcat(char* dst, const char* src);
 static uint32_t core_strncat(char* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
+
+static int32_t core_strToInt(const char* str, char** endPtr, int32_t base);
+static float core_strToFloat(const char* str, char** endPtr);
+static double core_strToDouble(const char* str, char** endPtr);
 
 static bool core_isupper(char ch);
 static bool core_islower(char ch);

@@ -2,54 +2,31 @@
 #error "Must be included from swr_vec_math.h"
 #endif
 
+#define VEC4F(e0, e1, e2, e3) (vec4f){ .m_Elem[0] = (e0), .m_Elem[1] = (e1), .m_Elem[2] = (e2), .m_Elem[3] = (e3) }
+
 static inline vec4f vec4f_zero(void)
 {
-	return (vec4f){ 
-		.m_Elem[0] = 0.0f,
-		.m_Elem[1] = 0.0f,
-		.m_Elem[2] = 0.0f,
-		.m_Elem[3] = 0.0f
-	};
+	return VEC4F(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 static inline vec4f vec4f_fromFloat(float x)
 {
-	return (vec4f){
-		.m_Elem[0] = x,
-		.m_Elem[1] = x,
-		.m_Elem[2] = x,
-		.m_Elem[3] = x
-	};
+	return VEC4F(x, x, x, x);
 }
 
 static inline vec4f vec4f_fromVec4i(vec4i x)
 {
-	return (vec4f){
-		.m_Elem[0] = (float)x.m_Elem[0],
-		.m_Elem[1] = (float)x.m_Elem[1],
-		.m_Elem[2] = (float)x.m_Elem[2],
-		.m_Elem[3] = (float)x.m_Elem[3]
-	};
+	return VEC4F((float)x.m_Elem[0], (float)x.m_Elem[1], (float)x.m_Elem[2], (float)x.m_Elem[3]);
 }
 
 static inline vec4f vec4f_fromFloat4(float x0, float x1, float x2, float x3)
 {
-	return (vec4f){
-		.m_Elem[0] = x0,
-		.m_Elem[1] = x1,
-		.m_Elem[2] = x2,
-		.m_Elem[3] = x3
-	};
+	return VEC4F(x0, x1, x2, x3);
 }
 
 static inline vec4f vec4f_fromRGBA8(uint32_t rgba8)
 {
-	return (vec4f){
-		.m_Elem[0] = (float)((rgba8 & 0xFF000000u) >> 24),
-		.m_Elem[1] = (float)((rgba8 & 0x00FF0000u) >> 16),
-		.m_Elem[2] = (float)((rgba8 & 0x0000FF00u) >> 8),
-		.m_Elem[3] = (float)((rgba8 & 0x000000FFu) >> 0)
-	};
+	return VEC4F((float)((rgba8 & 0xFF000000u) >> 24), (float)((rgba8 & 0x00FF0000u) >> 16), (float)((rgba8 & 0x0000FF00u) >> 8), (float)((rgba8 & 0x000000FFu) >> 0));
 }
 
 static inline uint32_t vec4f_toRGBA8(vec4f x)
@@ -64,62 +41,32 @@ static inline uint32_t vec4f_toRGBA8(vec4f x)
 
 static inline vec4f vec4f_add(vec4f a, vec4f b)
 {
-	return (vec4f){
-		.m_Elem[0] = a.m_Elem[0] + b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] + b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] + b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] + b.m_Elem[3]
-	};
+	return VEC4F(a.m_Elem[0] + b.m_Elem[0], a.m_Elem[1] + b.m_Elem[1], a.m_Elem[2] + b.m_Elem[2], a.m_Elem[3] + b.m_Elem[3]);
 }
 
 static inline vec4f vec4f_sub(vec4f a, vec4f b)
 {
-	return (vec4f){
-		.m_Elem[0] = a.m_Elem[0] - b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] - b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] - b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] - b.m_Elem[3]
-	};
+	return VEC4F(a.m_Elem[0] - b.m_Elem[0], a.m_Elem[1] - b.m_Elem[1], a.m_Elem[2] - b.m_Elem[2], a.m_Elem[3] - b.m_Elem[3]);
 }
 
 static inline vec4f vec4f_mul(vec4f a, vec4f b)
 {
-	return (vec4f){
-		.m_Elem[0] = a.m_Elem[0] * b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] * b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] * b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] * b.m_Elem[3]
-	};
+	return VEC4F(a.m_Elem[0] * b.m_Elem[0], a.m_Elem[1] * b.m_Elem[1], a.m_Elem[2] * b.m_Elem[2], a.m_Elem[3] * b.m_Elem[3]);
 }
 
 static vec4f vec4f_floor(vec4f x)
 {
-	return (vec4f){
-		.m_Elem[0] = core_floorf(x.m_Elem[0]),
-		.m_Elem[1] = core_floorf(x.m_Elem[1]),
-		.m_Elem[2] = core_floorf(x.m_Elem[2]),
-		.m_Elem[3] = core_floorf(x.m_Elem[3]),
-	};
+	return VEC4F(core_floorf(x.m_Elem[0]), core_floorf(x.m_Elem[1]), core_floorf(x.m_Elem[2]), core_floorf(x.m_Elem[3]));
 }
 
 static vec4f vec4f_ceil(vec4f x)
 {
-	return (vec4f){
-		.m_Elem[0] = core_ceilf(x.m_Elem[0]),
-		.m_Elem[1] = core_ceilf(x.m_Elem[1]),
-		.m_Elem[2] = core_ceilf(x.m_Elem[2]),
-		.m_Elem[3] = core_ceilf(x.m_Elem[3]),
-	};
+	return VEC4F(core_ceilf(x.m_Elem[0]), core_ceilf(x.m_Elem[1]), core_ceilf(x.m_Elem[2]), core_ceilf(x.m_Elem[3]));
 }
 
 static inline vec4f vec4f_madd(vec4f a, vec4f b, vec4f c)
 {
-	return (vec4f){
-		.m_Elem[0] = a.m_Elem[0] * b.m_Elem[0] + c.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] * b.m_Elem[1] + c.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] * b.m_Elem[2] + c.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] * b.m_Elem[3] + c.m_Elem[3]
-	};
+	return VEC4F(a.m_Elem[0] * b.m_Elem[0] + c.m_Elem[0], a.m_Elem[1] * b.m_Elem[1] + c.m_Elem[1], a.m_Elem[2] * b.m_Elem[2] + c.m_Elem[2], a.m_Elem[3] * b.m_Elem[3] + c.m_Elem[3]);
 }
 
 #define VEC4F_GET_FUNC(swizzle) \
@@ -144,54 +91,33 @@ VEC4F_GET_FUNC(WWWW)
 VEC4F_GET_FUNC(XYXY)
 VEC4F_GET_FUNC(ZWZW)
 
+#undef VEC4F
+
+#define VEC4I(e0, e1, e2, e3) (vec4i){ .m_Elem[0] = (e0), .m_Elem[1] = (e1), .m_Elem[2] = (e2), .m_Elem[3] = (e3) }
+
 static inline vec4i vec4i_zero(void)
 {
-	return (vec4i){
-		.m_Elem[0] = 0,
-		.m_Elem[1] = 0,
-		.m_Elem[2] = 0,
-		.m_Elem[3] = 0
-	};
+	return VEC4I(0, 0, 0, 0);
 }
 
 static inline vec4i vec4i_fromInt(int32_t x)
 {
-	return (vec4i){
-		.m_Elem[0] = x,
-		.m_Elem[1] = x,
-		.m_Elem[2] = x,
-		.m_Elem[3] = x
-	};
+	return VEC4I(x, x, x, x);
 }
 
 static inline vec4i vec4i_fromVec4f(vec4f x)
 {
-	return (vec4i){
-		.m_Elem[0] = (int32_t)x.m_Elem[0],
-		.m_Elem[1] = (int32_t)x.m_Elem[1],
-		.m_Elem[2] = (int32_t)x.m_Elem[2],
-		.m_Elem[3] = (int32_t)x.m_Elem[3]
-	};
+	return VEC4I((int32_t)x.m_Elem[0], (int32_t)x.m_Elem[1], (int32_t)x.m_Elem[2], (int32_t)x.m_Elem[3]);
 }
 
 static inline vec4i vec4i_fromInt4(int32_t x0, int32_t x1, int32_t x2, int32_t x3)
 {
-	return (vec4i){
-		.m_Elem[0] = x0,
-		.m_Elem[1] = x1,
-		.m_Elem[2] = x2,
-		.m_Elem[3] = x3
-	};
+	return VEC4I(x0, x1, x2, x3);
 }
 
 static inline vec4i vec4i_fromInt4va(const int32_t* arr)
 {
-	return (vec4i){
-		.m_Elem[0] = arr[0],
-		.m_Elem[1] = arr[1],
-		.m_Elem[2] = arr[2],
-		.m_Elem[3] = arr[3]
-	};
+	return VEC4I(arr[0], arr[1], arr[2], arr[3]);
 }
 
 static inline void vec4i_toInt4vu(vec4i x, int32_t* arr)
@@ -233,52 +159,27 @@ static inline int32_t vec4i_toInt(vec4i x)
 
 static inline vec4i vec4i_add(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = a.m_Elem[0] + b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] + b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] + b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] + b.m_Elem[3]
-	};
+	return VEC4I(a.m_Elem[0] + b.m_Elem[0], a.m_Elem[1] + b.m_Elem[1], a.m_Elem[2] + b.m_Elem[2], a.m_Elem[3] + b.m_Elem[3]);
 }
 
 static inline vec4i vec4i_sub(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = a.m_Elem[0] - b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] - b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] - b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] - b.m_Elem[3]
-	};
+	return VEC4I(a.m_Elem[0] - b.m_Elem[0], a.m_Elem[1] - b.m_Elem[1], a.m_Elem[2] - b.m_Elem[2], a.m_Elem[3] - b.m_Elem[3]);
 }
 
 static inline vec4i vec4i_mullo(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = a.m_Elem[0] * b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] * b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] * b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] * b.m_Elem[3]
-	};
+	return VEC4I(a.m_Elem[0] * b.m_Elem[0], a.m_Elem[1] * b.m_Elem[1], a.m_Elem[2] * b.m_Elem[2], a.m_Elem[3] * b.m_Elem[3]);
 }
 
 static inline vec4i vec4i_and(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = a.m_Elem[0] & b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] & b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] & b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] & b.m_Elem[3]
-	};
+	return VEC4I(a.m_Elem[0] & b.m_Elem[0], a.m_Elem[1] & b.m_Elem[1], a.m_Elem[2] & b.m_Elem[2], a.m_Elem[3] & b.m_Elem[3]);
 }
 
 static inline vec4i vec4i_or(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = a.m_Elem[0] | b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] | b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] | b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] | b.m_Elem[3]
-	};
+	return VEC4I(a.m_Elem[0] | b.m_Elem[0], a.m_Elem[1] | b.m_Elem[1], a.m_Elem[2] | b.m_Elem[2], a.m_Elem[3] | b.m_Elem[3]);
 }
 
 static inline vec4i vec4i_or3(vec4i a, vec4i b, vec4i c)
@@ -288,62 +189,37 @@ static inline vec4i vec4i_or3(vec4i a, vec4i b, vec4i c)
 
 static inline vec4i vec4i_andnot(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = (int32_t)(~(uint32_t)a.m_Elem[0] & (uint32_t)b.m_Elem[0]),
-		.m_Elem[1] = (int32_t)(~(uint32_t)a.m_Elem[1] & (uint32_t)b.m_Elem[1]),
-		.m_Elem[2] = (int32_t)(~(uint32_t)a.m_Elem[2] & (uint32_t)b.m_Elem[2]),
-		.m_Elem[3] = (int32_t)(~(uint32_t)a.m_Elem[3] & (uint32_t)b.m_Elem[3])
-	};
+	return VEC4I((int32_t)(~(uint32_t)a.m_Elem[0] & (uint32_t)b.m_Elem[0]), (int32_t)(~(uint32_t)a.m_Elem[1] & (uint32_t)b.m_Elem[1]), (int32_t)(~(uint32_t)a.m_Elem[2] & (uint32_t)b.m_Elem[2]), (int32_t)(~(uint32_t)a.m_Elem[3] & (uint32_t)b.m_Elem[3]));
 }
 
 static inline vec4i vec4i_xor(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = a.m_Elem[0] ^ b.m_Elem[0],
-		.m_Elem[1] = a.m_Elem[1] ^ b.m_Elem[1],
-		.m_Elem[2] = a.m_Elem[2] ^ b.m_Elem[2],
-		.m_Elem[3] = a.m_Elem[3] ^ b.m_Elem[3]
-	};
+	return VEC4I(a.m_Elem[0] ^ b.m_Elem[0], a.m_Elem[1] ^ b.m_Elem[1], a.m_Elem[2] ^ b.m_Elem[2], a.m_Elem[3] ^ b.m_Elem[3]);
 }
 
 static inline vec4i vec4i_sar(vec4i x, uint32_t shift)
 {
-	return (vec4i){
-		.m_Elem[0] = x.m_Elem[0] >> shift,
-		.m_Elem[1] = x.m_Elem[1] >> shift,
-		.m_Elem[2] = x.m_Elem[2] >> shift,
-		.m_Elem[3] = x.m_Elem[3] >> shift
-	};
+	return VEC4I(x.m_Elem[0] >> shift, x.m_Elem[1] >> shift, x.m_Elem[2] >> shift, x.m_Elem[3] >> shift);
 }
 
 static inline vec4i vec4i_sal(vec4i x, uint32_t shift)
 {
-	return (vec4i){
-		.m_Elem[0] = x.m_Elem[0] << shift,
-		.m_Elem[1] = x.m_Elem[1] << shift,
-		.m_Elem[2] = x.m_Elem[2] << shift,
-		.m_Elem[3] = x.m_Elem[3] << shift
-	};
+	return VEC4I(x.m_Elem[0] << shift, x.m_Elem[1] << shift, x.m_Elem[2] << shift, x.m_Elem[3] << shift);
 }
 
 static inline vec4i vec4i_cmplt(vec4i a, vec4i b)
 {
-	return (vec4i){
-		.m_Elem[0] = (a.m_Elem[0] < b.m_Elem[0]) ? 0xFFFFFFFF : 0,
-		.m_Elem[1] = (a.m_Elem[1] < b.m_Elem[1]) ? 0xFFFFFFFF : 0,
-		.m_Elem[2] = (a.m_Elem[2] < b.m_Elem[2]) ? 0xFFFFFFFF : 0,
-		.m_Elem[3] = (a.m_Elem[3] < b.m_Elem[3]) ? 0xFFFFFFFF : 0,
-	};
+	return VEC4I((a.m_Elem[0] < b.m_Elem[0]) ? 0xFFFFFFFF : 0, (a.m_Elem[1] < b.m_Elem[1]) ? 0xFFFFFFFF : 0, (a.m_Elem[2] < b.m_Elem[2]) ? 0xFFFFFFFF : 0, (a.m_Elem[3] < b.m_Elem[3]) ? 0xFFFFFFFF : 0);
 }
 
 static inline vec4i vec4i_packR32G32B32A32_to_RGBA8(vec4i r, vec4i g, vec4i b, vec4i a)
 {
-	return (vec4i){
-		.m_Elem[0] = ((r.m_Elem[0] & 0xFF) << 24) | ((g.m_Elem[0] & 0xFF) << 16) | ((b.m_Elem[0] & 0xFF) << 8) | ((a.m_Elem[0] & 0xFF) << 0),
-		.m_Elem[1] = ((r.m_Elem[1] & 0xFF) << 24) | ((g.m_Elem[1] & 0xFF) << 16) | ((b.m_Elem[1] & 0xFF) << 8) | ((a.m_Elem[1] & 0xFF) << 0),
-		.m_Elem[2] = ((r.m_Elem[2] & 0xFF) << 24) | ((g.m_Elem[2] & 0xFF) << 16) | ((b.m_Elem[2] & 0xFF) << 8) | ((a.m_Elem[2] & 0xFF) << 0),
-		.m_Elem[3] = ((r.m_Elem[3] & 0xFF) << 24) | ((g.m_Elem[3] & 0xFF) << 16) | ((b.m_Elem[3] & 0xFF) << 8) | ((a.m_Elem[3] & 0xFF) << 0),
-	};
+	return VEC4I(
+		((r.m_Elem[0] & 0xFF) << 24) | ((g.m_Elem[0] & 0xFF) << 16) | ((b.m_Elem[0] & 0xFF) << 8) | ((a.m_Elem[0] & 0xFF) << 0),
+		((r.m_Elem[1] & 0xFF) << 24) | ((g.m_Elem[1] & 0xFF) << 16) | ((b.m_Elem[1] & 0xFF) << 8) | ((a.m_Elem[1] & 0xFF) << 0),
+		((r.m_Elem[2] & 0xFF) << 24) | ((g.m_Elem[2] & 0xFF) << 16) | ((b.m_Elem[2] & 0xFF) << 8) | ((a.m_Elem[2] & 0xFF) << 0),
+		((r.m_Elem[3] & 0xFF) << 24) | ((g.m_Elem[3] & 0xFF) << 16) | ((b.m_Elem[3] & 0xFF) << 8) | ((a.m_Elem[3] & 0xFF) << 0)
+	);
 }
 
 static inline bool vec4i_anyNegative(vec4i x)
@@ -387,3 +263,5 @@ VEC4I_GET_FUNC(ZZZZ);
 VEC4I_GET_FUNC(WWWW);
 VEC4I_GET_FUNC(XYXY);
 VEC4I_GET_FUNC(ZWZW);
+
+#undef VEC4I

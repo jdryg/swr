@@ -4,6 +4,8 @@
 #define STB_SPRINTF_IMPLEMENTATION
 #include <stb_sprintf.h>
 
+#include <stdlib.h> // strtol
+
 static uint32_t str_strnlen(const char* str, uint32_t max);
 static char* str_strndup(const char* str, uint32_t n, core_allocator_i* allocator);
 static uint32_t str_strcpy(char* dst, uint32_t dstSize, const char* src, uint32_t n);
@@ -11,6 +13,8 @@ static int32_t str_strcmp(const char* lhs, uint32_t lhsMax, const char* rhs, uin
 static char* str_strnrchr(char* str, uint32_t n, char ch);
 static char* str_strnchr(char* str, uint32_t n, char ch);
 static uint32_t str_strncat(char* dst, uint32_t dstSize, const char* src, uint32_t n);
+static int32_t str_strTo_int(const char* str, char** endPtr, int32_t base);
+static double str_strTo_double(const char* str, char** endPtr);
 static uint32_t str_utf8ToUtf16(uint16_t* dst, uint32_t dstMax, const char* src, uint32_t srcLen);
 static uint32_t str_utf8FromUtf16(char* dst, uint32_t dstMax, const uint16_t* src, uint32_t srcLen);
 static uint32_t str_utf8FromUtf32(char* dst, uint32_t dstMax, const uint32_t* src, uint32_t srcLen);
@@ -26,6 +30,8 @@ core_str_api* str_api = &(core_str_api){
 	.strnrchr = str_strnrchr,
 	.strnchr = str_strnchr,
 	.strncat = str_strncat,
+	.strTo_int = str_strTo_int,
+	.strTo_double = str_strTo_double,
 	.utf8to_utf16 = str_utf8ToUtf16,
 	.utf8from_utf16 = str_utf8FromUtf16,
 	.utf8from_utf32 = str_utf8FromUtf32,
@@ -115,6 +121,18 @@ static uint32_t str_strncat(char* dst, uint32_t dstSize, const char* src, uint32
 	const uint32_t max = dstSize;
 	const uint32_t len = core_strnlen(dst, dstSize);
 	return core_strcpy(&dst[len], max - len, src, n);
+}
+
+static int32_t str_strTo_int(const char* str, char** endPtr, int32_t base)
+{
+	// TODO: Replace?
+	return (int32_t)strtol(str, endPtr, base);
+}
+
+static double str_strTo_double(const char* str, char** endPtr)
+{
+	// TODO: Replace?
+	return strtod(str, endPtr);
 }
 
 //////////////////////////////////////////////////////////////////////////

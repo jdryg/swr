@@ -14,12 +14,11 @@ typedef struct swr_edge
 
 static inline swr_edge swr_edgeInit(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
-	return (swr_edge)
-	{
+	return (swr_edge){
 		.m_x0 = x0,
-			.m_y0 = y0,
-			.m_dx = (y1 - y0),
-			.m_dy = (x0 - x1),
+		.m_y0 = y0,
+		.m_dx = (y1 - y0),
+		.m_dy = (x0 - x1),
 	};
 }
 
