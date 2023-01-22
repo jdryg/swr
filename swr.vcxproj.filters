@@ -84,6 +84,9 @@
     <ClCompile Include="src\core\math.c">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\m6502_mesh.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="src\swr\inline\swr_vec_math_sse2.inl">
       <Filter>src\swr\inline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\m6502_mesh.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

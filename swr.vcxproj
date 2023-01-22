@@ -130,6 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\minifb\include;$(SolutionDir)3rdparty\minifb\src;$(SolutionDir)3rdparty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +152,7 @@
     <ClCompile Include="src\core\memory.c" />
     <ClCompile Include="src\core\os_win32.c" />
     <ClCompile Include="src\core\string.c" />
+    <ClCompile Include="src\m6502_mesh.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\swr\swr.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_ref.c" />
@@ -173,6 +175,7 @@
     <ClInclude Include="src\core\os.h" />
     <ClInclude Include="src\core\string.h" />
     <ClInclude Include="src\fonts\font8x8_basic.h" />
+    <ClInclude Include="src\m6502_mesh.h" />
     <ClInclude Include="src\swr\inline\swr_vec_math_sse2.inl" />
     <ClInclude Include="src\swr\swr.h" />
     <ClInclude Include="src\swr\swr_vec_math.h" />

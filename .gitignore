@@ -1,3 +1,5 @@
 /.vs
 /x64/Debug
 /x64/Release
+/GPUCache
+/VTune Profiler Results/swr

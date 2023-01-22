@@ -44,6 +44,7 @@ typedef struct core_allocator_i core_allocator_i;
 #define SWR_COLOR_BLUE         SWR_COLOR(0, 0, 255, 255)
 #define SWR_COLOR_YELLOW       SWR_COLOR(255, 255, 0, 255)
 #define SWR_COLOR_WHITE        SWR_COLOR(255, 255, 255, 255)
+#define SWR_COLOR_GRAY         SWR_COLOR(128, 128, 128, 255)
 
 typedef struct swr_font
 {
