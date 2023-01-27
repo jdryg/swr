@@ -1,7 +1,7 @@
 #include "swr.h"
 #include "../core/math.h"
 
-#define SWR_VEC_MATH_SSE2
+#define SWR_VEC_MATH_SSSE3
 #include "swr_vec_math.h"
 
 typedef struct swr_edge
@@ -14,11 +14,12 @@ typedef struct swr_edge
 
 static inline swr_edge swr_edgeInit(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
-	return (swr_edge){
+	return (swr_edge)
+	{
 		.m_x0 = x0,
-		.m_y0 = y0,
-		.m_dx = (y1 - y0),
-		.m_dy = (x0 - x1),
+			.m_y0 = y0,
+			.m_dx = (y1 - y0),
+			.m_dy = (x0 - x1),
 	};
 }
 
@@ -30,7 +31,7 @@ static inline int32_t swr_edgeEval(swr_edge edge, int32_t x, int32_t y)
 		;
 }
 
-void swrDrawTriangleSSE2(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
+void swrDrawTriangleSSSE3(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
 {
 	// Make sure the triangle is CCW. If it's not swap points 1 and 2 to make it CCW.
 	int32_t iarea = (x0 - x2) * (y1 - y0) - (x1 - x0) * (y0 - y2);

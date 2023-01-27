@@ -87,6 +87,12 @@
     <ClCompile Include="src\m6502_mesh.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\swr\swr_draw_triangle_ssse3.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\swr\swr_draw_triangle_sse41.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h">
@@ -170,6 +176,12 @@
       <Filter>src\core\inline</Filter>
     </None>
     <None Include="src\swr\inline\swr_vec_math_ref.inl">
+      <Filter>src\swr\inline</Filter>
+    </None>
+    <None Include="src\swr\inline\swr_vec_math_ssse3.inl">
+      <Filter>src\swr\inline</Filter>
+    </None>
+    <None Include="src\swr\inline\swr_vec_math_sse41.inl">
       <Filter>src\swr\inline</Filter>
     </None>
   </ItemGroup>

@@ -111,8 +111,8 @@ int32_t main(void)
 		const uint64_t tStart = core_osTimeNow();
 		{
 			const float size = 680.0f;
-			const float padX = (kWinWidth - size) * 0.5f;
-			const float padY = (kWinHeight - size) * 0.5f;
+			const float padX = ((float)kWinWidth - size) * 0.5f;
+			const float padY = ((float)kWinHeight - size) * 0.5f;
 
 			// Transform vertices to screen space
 			{

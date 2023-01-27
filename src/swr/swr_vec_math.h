@@ -25,7 +25,7 @@ typedef enum vec4_shuffle_mask
 
 typedef struct vec4f
 {
-#if defined(SWR_VEC_MATH_SSE2)
+#if defined(SWR_VEC_MATH_SSE2) || defined(SWR_VEC_MATH_SSSE3) || defined(SWR_VEC_MATH_SSE41)
 	__m128 m_XMM;
 #else
 	float m_Elem[4];
@@ -34,7 +34,7 @@ typedef struct vec4f
 
 typedef struct vec4i
 {
-#if defined(SWR_VEC_MATH_SSE2)
+#if defined(SWR_VEC_MATH_SSE2) || defined(SWR_VEC_MATH_SSSE3) || defined(SWR_VEC_MATH_SSE41)
 	__m128i m_IMM;
 #else
 	int32_t m_Elem[4];
@@ -95,6 +95,10 @@ static uint32_t vec4i_getSignMask(vec4i x);
 
 #if defined(SWR_VEC_MATH_SSE2)
 #include "inline/swr_vec_math_sse2.inl"
+#elif defined(SWR_VEC_MATH_SSSE3)
+#include "inline/swr_vec_math_ssse3.inl"
+#elif defined(SWR_VEC_MATH_SSE41)
+#include "inline/swr_vec_math_sse41.inl"
 #else
 #include "inline/swr_vec_math_ref.inl"
 #endif
