@@ -235,7 +235,11 @@ static inline bool vec4i_anyNegative(vec4i x)
 
 static inline bool vec4i_allNegative(vec4i x)
 {
+#if 0
 	return (_mm_movemask_epi8(x.m_IMM) & 0x8888) == 0x8888;
+#else
+	return (_mm_movemask_ps(_mm_castsi128_ps(x.m_IMM)) == 0x0F);
+#endif
 }
 
 static inline uint32_t vec4i_getSignMask(vec4i x)

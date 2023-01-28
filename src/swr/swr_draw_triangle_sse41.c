@@ -12,14 +12,21 @@ typedef struct swr_edge
 	int32_t m_dy;
 } swr_edge;
 
+typedef struct swr_vertex_attrib
+{
+	vec4f m_Val2;
+	vec4f m_dVal02;
+	vec4f m_dVal12;
+} swr_vertex_attrib;
+
 static inline swr_edge swr_edgeInit(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
 	return (swr_edge)
 	{
 		.m_x0 = x0,
-			.m_y0 = y0,
-			.m_dx = (y1 - y0),
-			.m_dy = (x0 - x1),
+		.m_y0 = y0,
+		.m_dx = (y1 - y0),
+		.m_dy = (x0 - x1),
 	};
 }
 
@@ -29,6 +36,20 @@ static inline int32_t swr_edgeEval(swr_edge edge, int32_t x, int32_t y)
 		+ (x - edge.m_x0) * edge.m_dx
 		+ (y - edge.m_y0) * edge.m_dy
 		;
+}
+
+static inline swr_vertex_attrib swr_vertexAttribInit(vec4f v2, vec4f dv02, vec4f dv12)
+{
+	return (swr_vertex_attrib){
+		.m_Val2 = v2,
+		.m_dVal02 = dv02,
+		.m_dVal12 = dv12
+	};
+}
+
+static inline vec4f swr_vertexAttribEval(swr_vertex_attrib va, vec4f w0, vec4f w1)
+{
+	return vec4f_madd(va.m_dVal02, w0, vec4f_madd(va.m_dVal12, w1, va.m_Val2));
 }
 
 void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
@@ -51,6 +72,10 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	const int32_t bboxMinY = core_maxi32(core_min3i32(y0, y1, y2), 0);
 	const int32_t bboxMaxX = core_mini32(core_max3i32(x0, x1, x2), (int32_t)(ctx->m_Width - 1));
 	const int32_t bboxMaxY = core_mini32(core_max3i32(y0, y1, y2), (int32_t)(ctx->m_Height - 1));
+	if (bboxMinX >= bboxMaxX || bboxMinY >= bboxMaxY) {
+		return;
+	}
+
 	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
 	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
 	const int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX, 16);
@@ -66,18 +91,10 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	const vec4f v_c02 = vec4f_sub(v_c0, v_c2);
 	const vec4f v_c12 = vec4f_sub(v_c1, v_c2);
 
-	const vec4f v_r2 = vec4f_getXXXX(v_c2);
-	const vec4f v_g2 = vec4f_getYYYY(v_c2);
-	const vec4f v_b2 = vec4f_getZZZZ(v_c2);
-	const vec4f v_a2 = vec4f_getWWWW(v_c2);
-	const vec4f v_dr02 = vec4f_getXXXX(v_c02);
-	const vec4f v_dg02 = vec4f_getYYYY(v_c02);
-	const vec4f v_db02 = vec4f_getZZZZ(v_c02);
-	const vec4f v_da02 = vec4f_getWWWW(v_c02);
-	const vec4f v_dr12 = vec4f_getXXXX(v_c12);
-	const vec4f v_dg12 = vec4f_getYYYY(v_c12);
-	const vec4f v_db12 = vec4f_getZZZZ(v_c12);
-	const vec4f v_da12 = vec4f_getWWWW(v_c12);
+	const swr_vertex_attrib va_r = swr_vertexAttribInit(vec4f_getXXXX(v_c2), vec4f_getXXXX(v_c02), vec4f_getXXXX(v_c12));
+	const swr_vertex_attrib va_g = swr_vertexAttribInit(vec4f_getYYYY(v_c2), vec4f_getYYYY(v_c02), vec4f_getYYYY(v_c12));
+	const swr_vertex_attrib va_b = swr_vertexAttribInit(vec4f_getZZZZ(v_c2), vec4f_getZZZZ(v_c02), vec4f_getZZZZ(v_c12));
+	const swr_vertex_attrib va_a = swr_vertexAttribInit(vec4f_getWWWW(v_c2), vec4f_getWWWW(v_c02), vec4f_getWWWW(v_c12));
 
 	// Barycentric coordinate normalization
 	const vec4f v_inv_area = vec4f_fromFloat(1.0f / (float)iarea);
@@ -213,11 +230,11 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #else
 						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row0), v_inv_area);
 						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row0), v_inv_area);
-						const vec4i v_cr = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0, vec4f_madd(v_dr12, v_l1, v_r2)));
-						const vec4i v_cg = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0, vec4f_madd(v_dg12, v_l1, v_g2)));
-						const vec4i v_cb = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0, vec4f_madd(v_db12, v_l1, v_b2)));
-						const vec4i v_ca = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0, vec4f_madd(v_da12, v_l1, v_a2)));
-						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(v_cr, v_cg, v_cb, v_ca);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
 						vec4i_toInt4va_maskedInv(v_rgba8, v_notPixelMask, &fb_row[0]);
 					}
@@ -230,11 +247,11 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #else
 						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row1), v_inv_area);
 						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row1), v_inv_area);
-						const vec4i v_cr = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0, vec4f_madd(v_dr12, v_l1, v_r2)));
-						const vec4i v_cg = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0, vec4f_madd(v_dg12, v_l1, v_g2)));
-						const vec4i v_cb = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0, vec4f_madd(v_db12, v_l1, v_b2)));
-						const vec4i v_ca = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0, vec4f_madd(v_da12, v_l1, v_a2)));
-						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(v_cr, v_cg, v_cb, v_ca);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
 						vec4i_toInt4va_maskedInv(v_rgba8, v_notPixelMask, &fb_row[ctx->m_Width]);
 					}
@@ -247,11 +264,11 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #else
 						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row2), v_inv_area);
 						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row2), v_inv_area);
-						const vec4i v_cr = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0, vec4f_madd(v_dr12, v_l1, v_r2)));
-						const vec4i v_cg = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0, vec4f_madd(v_dg12, v_l1, v_g2)));
-						const vec4i v_cb = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0, vec4f_madd(v_db12, v_l1, v_b2)));
-						const vec4i v_ca = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0, vec4f_madd(v_da12, v_l1, v_a2)));
-						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(v_cr, v_cg, v_cb, v_ca);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
 						vec4i_toInt4va_maskedInv(v_rgba8, v_notPixelMask, &fb_row[ctx->m_Width * 2]);
 					}
@@ -264,11 +281,11 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #else
 						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row3), v_inv_area);
 						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row3), v_inv_area);
-						const vec4i v_cr = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0, vec4f_madd(v_dr12, v_l1, v_r2)));
-						const vec4i v_cg = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0, vec4f_madd(v_dg12, v_l1, v_g2)));
-						const vec4i v_cb = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0, vec4f_madd(v_db12, v_l1, v_b2)));
-						const vec4i v_ca = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0, vec4f_madd(v_da12, v_l1, v_a2)));
-						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(v_cr, v_cg, v_cb, v_ca);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
 						vec4i_toInt4va_maskedInv(v_rgba8, v_notPixelMask, &fb_row[ctx->m_Width * 3]);
 					}
@@ -288,15 +305,15 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
 						const vec4i v_rgba8_row0 = vec4i_fromInt(-1);
 #else
-						const vec4f v_l0_row0 = vec4f_mul(vec4f_fromVec4i(v_w0_row0), v_inv_area);
-						const vec4f v_l1_row0 = vec4f_mul(vec4f_fromVec4i(v_w1_row0), v_inv_area);
-						const vec4i v_cr_row0 = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0_row0, vec4f_madd(v_dr12, v_l1_row0, v_r2)));
-						const vec4i v_cg_row0 = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0_row0, vec4f_madd(v_dg12, v_l1_row0, v_g2)));
-						const vec4i v_cb_row0 = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0_row0, vec4f_madd(v_db12, v_l1_row0, v_b2)));
-						const vec4i v_ca_row0 = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0_row0, vec4f_madd(v_da12, v_l1_row0, v_a2)));
-						const vec4i v_rgba8_row0 = vec4i_packR32G32B32A32_to_RGBA8(v_cr_row0, v_cg_row0, v_cb_row0, v_ca_row0);
+						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row0), v_inv_area);
+						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row0), v_inv_area);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
-						vec4i_toInt4va(v_rgba8_row0, &fb_row[0]);
+						vec4i_toInt4va(v_rgba8, &fb_row[0]);
 					}
 
 					// Row 1
@@ -304,15 +321,15 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
 						const vec4i v_rgba8_row1 = vec4i_fromInt(-1);
 #else
-						const vec4f v_l0_row1 = vec4f_mul(vec4f_fromVec4i(v_w0_row1), v_inv_area);
-						const vec4f v_l1_row1 = vec4f_mul(vec4f_fromVec4i(v_w1_row1), v_inv_area);
-						const vec4i v_cr_row1 = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0_row1, vec4f_madd(v_dr12, v_l1_row1, v_r2)));
-						const vec4i v_cg_row1 = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0_row1, vec4f_madd(v_dg12, v_l1_row1, v_g2)));
-						const vec4i v_cb_row1 = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0_row1, vec4f_madd(v_db12, v_l1_row1, v_b2)));
-						const vec4i v_ca_row1 = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0_row1, vec4f_madd(v_da12, v_l1_row1, v_a2)));
-						const vec4i v_rgba8_row1 = vec4i_packR32G32B32A32_to_RGBA8(v_cr_row1, v_cg_row1, v_cb_row1, v_ca_row1);
+						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row1), v_inv_area);
+						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row1), v_inv_area);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
-						vec4i_toInt4va(v_rgba8_row1, &fb_row[ctx->m_Width]);
+						vec4i_toInt4va(v_rgba8, &fb_row[ctx->m_Width]);
 					}
 
 					// Row 2
@@ -320,15 +337,15 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
 						const vec4i v_rgba8_row2 = vec4i_fromInt(-1);
 #else
-						const vec4f v_l0_row2 = vec4f_mul(vec4f_fromVec4i(v_w0_row2), v_inv_area);
-						const vec4f v_l1_row2 = vec4f_mul(vec4f_fromVec4i(v_w1_row2), v_inv_area);
-						const vec4i v_cr_row2 = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0_row2, vec4f_madd(v_dr12, v_l1_row2, v_r2)));
-						const vec4i v_cg_row2 = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0_row2, vec4f_madd(v_dg12, v_l1_row2, v_g2)));
-						const vec4i v_cb_row2 = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0_row2, vec4f_madd(v_db12, v_l1_row2, v_b2)));
-						const vec4i v_ca_row2 = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0_row2, vec4f_madd(v_da12, v_l1_row2, v_a2)));
-						const vec4i v_rgba8_row2 = vec4i_packR32G32B32A32_to_RGBA8(v_cr_row2, v_cg_row2, v_cb_row2, v_ca_row2);
+						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row2), v_inv_area);
+						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row2), v_inv_area);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
-						vec4i_toInt4va(v_rgba8_row2, &fb_row[ctx->m_Width * 2]);
+						vec4i_toInt4va(v_rgba8, &fb_row[ctx->m_Width * 2]);
 					}
 
 					// Row 3
@@ -336,15 +353,15 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
 						const vec4i v_rgba8_row3 = vec4i_fromInt(-1);
 #else
-						const vec4f v_l0_row3 = vec4f_mul(vec4f_fromVec4i(v_w0_row3), v_inv_area);
-						const vec4f v_l1_row3 = vec4f_mul(vec4f_fromVec4i(v_w1_row3), v_inv_area);
-						const vec4i v_cr_row3 = vec4i_fromVec4f(vec4f_madd(v_dr02, v_l0_row3, vec4f_madd(v_dr12, v_l1_row3, v_r2)));
-						const vec4i v_cg_row3 = vec4i_fromVec4f(vec4f_madd(v_dg02, v_l0_row3, vec4f_madd(v_dg12, v_l1_row3, v_g2)));
-						const vec4i v_cb_row3 = vec4i_fromVec4f(vec4f_madd(v_db02, v_l0_row3, vec4f_madd(v_db12, v_l1_row3, v_b2)));
-						const vec4i v_ca_row3 = vec4i_fromVec4f(vec4f_madd(v_da02, v_l0_row3, vec4f_madd(v_da12, v_l1_row3, v_a2)));
-						const vec4i v_rgba8_row3 = vec4i_packR32G32B32A32_to_RGBA8(v_cr_row3, v_cg_row3, v_cb_row3, v_ca_row3);
+						const vec4f v_l0 = vec4f_mul(vec4f_fromVec4i(v_w0_row3), v_inv_area);
+						const vec4f v_l1 = vec4f_mul(vec4f_fromVec4i(v_w1_row3), v_inv_area);
+						const vec4f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+						const vec4f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+						const vec4f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+						const vec4f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+						const vec4i v_rgba8 = vec4i_packR32G32B32A32_to_RGBA8(vec4i_fromVec4f(v_cr), vec4i_fromVec4f(v_cg), vec4i_fromVec4f(v_cb), vec4i_fromVec4f(v_ca));
 #endif
-						vec4i_toInt4va(v_rgba8_row3, &fb_row[ctx->m_Width * 3]);
+						vec4i_toInt4va(v_rgba8, &fb_row[ctx->m_Width * 3]);
 					}
 				}
 			}
