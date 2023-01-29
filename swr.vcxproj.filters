@@ -155,6 +155,9 @@
     <ClInclude Include="src\m6502_mesh.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\swr\swr_p.h">
+      <Filter>src\swr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\core\inline\memory.inl">

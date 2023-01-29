@@ -56,18 +56,14 @@ typedef struct swr_font
 	uint8_t m_MissingCharFallbackID;
 } swr_font;
 
-typedef struct swr_context
-{
-	uint32_t* m_FrameBuffer;
-	uint32_t m_Width;
-	uint32_t m_Height;
-} swr_context;
+typedef struct swr_context swr_context;
 
 typedef struct swr_api
 {
 	swr_context* (*createContext)(core_allocator_i* allocator, uint32_t w, uint32_t h);
 	void (*destroyContext)(core_allocator_i* allocator, swr_context* ctx);
 
+	const void* (*getFrameBufferPtr)(swr_context* ctx);
 	void (*clear)(swr_context* ctx, uint32_t color);
 	void (*drawPixel)(swr_context* ctx, int32_t x, int32_t y, uint32_t color);
 	void (*drawLine)(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);

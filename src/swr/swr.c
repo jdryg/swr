@@ -1,4 +1,5 @@
 #include "swr.h"
+#include "swr_p.h"
 #include "../core/allocator.h"
 #include "../core/memory.h"
 #include "../core/string.h"
@@ -8,6 +9,7 @@
 
 static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, uint32_t h);
 static void swrDestroyContext(core_allocator_i* allocator, swr_context* ctx);
+static const void* swrGetFrameBufferPtr(swr_context* ctx);
 static void swrClear(swr_context* ctx, uint32_t color);
 static void swrDrawPixel(swr_context* ctx, int32_t x, int32_t y, uint32_t color);
 static void swrDrawLine(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);
@@ -17,6 +19,7 @@ static void swrDrawText(swr_context* ctx, const swr_font* font, int32_t x0, int3
 swr_api* swr = &(swr_api){
 	.createContext = swrCreateContext,
 	.destroyContext = swrDestroyContext,
+	.getFrameBufferPtr = swrGetFrameBufferPtr,
 	.clear = swrClear,
 	.drawPixel = swrDrawPixel,
 	.drawLine = swrDrawLine,
@@ -49,6 +52,11 @@ static void swrDestroyContext(core_allocator_i* allocator, swr_context* ctx)
 {
 	CORE_ALIGNED_FREE(allocator, ctx->m_FrameBuffer, 16);
 	CORE_FREE(allocator, ctx);
+}
+
+static const void* swrGetFrameBufferPtr(swr_context* ctx)
+{
+	return ctx->m_FrameBuffer;
 }
 
 static void swrClear(swr_context* ctx, uint32_t color)

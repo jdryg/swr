@@ -1,4 +1,5 @@
 #include "swr.h"
+#include "swr_p.h"
 #include "../core/math.h"
 
 #define SWR_VEC_MATH_SSSE3

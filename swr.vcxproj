@@ -180,6 +180,7 @@
     <ClInclude Include="src\m6502_mesh.h" />
     <ClInclude Include="src\swr\inline\swr_vec_math_sse2.inl" />
     <ClInclude Include="src\swr\swr.h" />
+    <ClInclude Include="src\swr\swr_p.h" />
     <ClInclude Include="src\swr\swr_vec_math.h" />
   </ItemGroup>
   <ItemGroup>

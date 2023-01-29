@@ -105,7 +105,10 @@ int32_t main(void)
 	movavgd_t frameTimeAvg;
 	core_memSet(&frameTimeAvg, 0, sizeof(movavgd_t));
 
+	uint32_t frameID = 0;
 	do {
+		++frameID;
+
 		swr->clear(swrCtx, SWR_COLOR_BLACK);
 
 		const uint64_t tStart = core_osTimeNow();
@@ -174,11 +177,13 @@ int32_t main(void)
 				, s.m_Average
 				, s.m_StdDev
 			);
-
 			swr->drawText(swrCtx, &font, 8, 8, str, NULL, SWR_COLOR_WHITE);
+
+			core_snprintf(str, CORE_COUNTOF(str), "Frame ID: %u\n", frameID);
+			swr->drawText(swrCtx, &font, 8, 16, str, NULL, SWR_COLOR_WHITE);
 		}
 
-		const int32_t winState = mfb_update_ex(window, swrCtx->m_FrameBuffer, swrCtx->m_Width, swrCtx->m_Height);
+		const int32_t winState = mfb_update(window, swr->getFrameBufferPtr(swrCtx));
 		if (winState < 0) {
 			window = NULL;
 			break;

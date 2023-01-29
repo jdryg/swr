@@ -1,4 +1,5 @@
 #include "swr.h"
+#include "swr_p.h"
 #include "../core/math.h"
 
 #if 1
