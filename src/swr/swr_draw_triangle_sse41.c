@@ -1,6 +1,7 @@
 #include "swr.h"
 #include "../core/math.h"
 
+#if 1
 #define SWR_VEC_MATH_SSE41
 #include "swr_vec_math.h"
 
@@ -376,3 +377,211 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 		v_w2_blockY = vec4i_add(v_w2_blockY, v_w2_nextBlock_dy);
 	}
 }
+#else
+#include <immintrin.h>
+
+// Rasterizes a triangle by calculating the exact rows covered by the triangle and the exact 
+// pixels touched on each row. This avoids conditionals inside the inner loop. It's faster
+// compared to the "hierarchical" algorithm used above.
+// 
+// TODO: Rewrite using vec4 math.
+void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
+{
+	int32_t iarea = (x2 - x0) * (y1 - y0) - (x1 - x0) * (y2 - y0);
+	if (iarea == 0) {
+		// Degenerate triangle with 0 area.
+		return;
+	} else if (iarea < 0) {
+		// Swap (x1, y1) <-> (x2, y2)
+		{ int32_t tmp = x1; x1 = x2; x2 = tmp; }
+		{ int32_t tmp = y1; y1 = y2; y2 = tmp; }
+		{ uint32_t tmp = color1; color1 = color2; color2 = tmp; }
+		iarea = -iarea;
+	}
+
+	const int32_t bboxMinX = core_maxi32(core_min3i32(x0, x1, x2), 0);
+	const int32_t bboxMinY = core_maxi32(core_min3i32(y0, y1, y2), 0);
+	const int32_t bboxMaxX = core_mini32(core_max3i32(x0, x1, x2), (int32_t)ctx->m_Width - 1);
+	const int32_t bboxMaxY = core_mini32(core_max3i32(y0, y1, y2), (int32_t)ctx->m_Height - 1);
+	const int32_t bboxWidth = bboxMaxX - bboxMinX;
+	const int32_t bboxHeight = bboxMaxY - bboxMinY;
+
+	const __m128i imm_zero = _mm_setzero_si128();
+	const __m128 xmm_rgba0 = _mm_cvtepi32_ps(_mm_unpacklo_epi16(_mm_unpacklo_epi8(_mm_loadu_si32(&color0), imm_zero), imm_zero));
+	const __m128 xmm_rgba1 = _mm_cvtepi32_ps(_mm_unpacklo_epi16(_mm_unpacklo_epi8(_mm_loadu_si32(&color1), imm_zero), imm_zero));
+	const __m128 xmm_rgba2 = _mm_cvtepi32_ps(_mm_unpacklo_epi16(_mm_unpacklo_epi8(_mm_loadu_si32(&color2), imm_zero), imm_zero));
+	const __m128 xmm_drgba20 = _mm_sub_ps(xmm_rgba2, xmm_rgba0);
+	const __m128 xmm_drgba10 = _mm_sub_ps(xmm_rgba1, xmm_rgba0);
+
+	const __m128 xmm_r0 = _mm_shuffle_ps(xmm_rgba0, xmm_rgba0, _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128 xmm_g0 = _mm_shuffle_ps(xmm_rgba0, xmm_rgba0, _MM_SHUFFLE(1, 1, 1, 1));
+	const __m128 xmm_b0 = _mm_shuffle_ps(xmm_rgba0, xmm_rgba0, _MM_SHUFFLE(2, 2, 2, 2));
+	const __m128 xmm_a0 = _mm_shuffle_ps(xmm_rgba0, xmm_rgba0, _MM_SHUFFLE(3, 3, 3, 3));
+	const __m128 xmm_dr20 = _mm_shuffle_ps(xmm_drgba20, xmm_drgba20, _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128 xmm_dg20 = _mm_shuffle_ps(xmm_drgba20, xmm_drgba20, _MM_SHUFFLE(1, 1, 1, 1));
+	const __m128 xmm_db20 = _mm_shuffle_ps(xmm_drgba20, xmm_drgba20, _MM_SHUFFLE(2, 2, 2, 2));
+	const __m128 xmm_da20 = _mm_shuffle_ps(xmm_drgba20, xmm_drgba20, _MM_SHUFFLE(3, 3, 3, 3));
+	const __m128 xmm_dr10 = _mm_shuffle_ps(xmm_drgba10, xmm_drgba10, _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128 xmm_dg10 = _mm_shuffle_ps(xmm_drgba10, xmm_drgba10, _MM_SHUFFLE(1, 1, 1, 1));
+	const __m128 xmm_db10 = _mm_shuffle_ps(xmm_drgba10, xmm_drgba10, _MM_SHUFFLE(2, 2, 2, 2));
+	const __m128 xmm_da10 = _mm_shuffle_ps(xmm_drgba10, xmm_drgba10, _MM_SHUFFLE(3, 3, 3, 3));
+
+	const int32_t dy01 = y0 - y1;
+	const int32_t dx01 = x0 - x1;
+	const int32_t dx20 = x2 - x0;
+	const int32_t dy20 = y2 - y0;
+	const int32_t dy01_dy20 = dy01 + dy20;
+
+	const __m128 xmm_zero = _mm_setzero_ps();
+	const __m128 xmm_inv_area = _mm_set1_ps(1.0f / (float)iarea);
+
+	// Barycentric coordinate deltas for the X direction
+	const __m128i imm_x_duvw_ = _mm_set_epi32(0, dy01_dy20, -dy20, -dy01);
+	const __m128 xmm_x_duvw_1 = _mm_mul_ps(_mm_cvtepi32_ps(imm_x_duvw_), xmm_inv_area);
+	const __m128 xmm_x_duvw_2 = _mm_add_ps(xmm_x_duvw_1, xmm_x_duvw_1);
+	const __m128 xmm_x_duvw_3 = _mm_add_ps(xmm_x_duvw_1, xmm_x_duvw_2);
+	const __m128 xmm_x_duvw_4 = _mm_add_ps(xmm_x_duvw_2, xmm_x_duvw_2);
+
+	// UV deltas for the 1st and 2nd pixel
+	const __m128 xmm_x_duv0_duv1 = _mm_shuffle_ps(xmm_zero, xmm_x_duvw_1, _MM_SHUFFLE(1, 0, 1, 0));
+
+	// UV deltas for the 3rd and 4th pixel
+	const __m128 xmm_x_duv2_duv3 = _mm_shuffle_ps(xmm_x_duvw_2, xmm_x_duvw_3, _MM_SHUFFLE(1, 0, 1, 0));
+
+	const __m128 xmm_x_du4 = _mm_shuffle_ps(xmm_x_duvw_4, xmm_x_duvw_4, _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128 xmm_x_dv4 = _mm_shuffle_ps(xmm_x_duvw_4, xmm_x_duvw_4, _MM_SHUFFLE(1, 1, 1, 1));
+
+	// Barycentric coordinate deltas for the Y direction
+	const __m128i imm_y_duvw_ = _mm_set_epi32(0, -(dx01 + dx20), dx20, dx01);
+
+	// Calculate unnormalized barycentric coordinates of the bounding box min.
+	const int32_t bboxMin_u = (x0 - bboxMinX) * dy01 - (y0 - bboxMinY) * dx01;
+	const int32_t bboxMin_v = (x0 - bboxMinX) * dy20 - (y0 - bboxMinY) * dx20;
+	const int32_t bboxMin_w = iarea - bboxMin_u - bboxMin_v;
+	__m128i imm_row_uvw_ = _mm_set_epi32(0, bboxMin_w, bboxMin_v, bboxMin_u);
+
+	// 
+	const __m128 xmm_row_uvw_scale = _mm_set_ps(0.0f, 1.0f / (float)dy01_dy20, 1.0f / (float)dy20, 1.0f / (float)dy01);
+
+	uint32_t* framebufferRow = &ctx->m_FrameBuffer[bboxMinX + bboxMinY * ctx->m_Width];
+	for (int32_t iy = 0; iy <= bboxHeight; ++iy) {
+		int32_t ixmin = 0;
+		int32_t ixmax = (uint32_t)bboxWidth;
+
+		// Calculate ixmin and ixmax
+		{
+			int32_t row_uvw_[4];
+			_mm_storeu_si128((__m128i*) & row_uvw_[0], imm_row_uvw_);
+
+			const __m128 xmm_row_uvw_ = _mm_mul_ps(_mm_cvtepi32_ps(imm_row_uvw_), xmm_row_uvw_scale);
+			const __m128i imm_row_uvw_floor = _mm_cvtps_epi32(_mm_floor_ps(xmm_row_uvw_));
+			const __m128i imm_row_uvw_ceil = _mm_cvtps_epi32(_mm_ceil_ps(xmm_row_uvw_));
+
+			int32_t row_uvw_floor[4];
+			_mm_storeu_si128((__m128i*) & row_uvw_floor[0], imm_row_uvw_floor);
+
+			int32_t row_uvw_ceil[4];
+			_mm_storeu_si128((__m128i*) & row_uvw_ceil[0], imm_row_uvw_ceil);
+
+			if (dy01 > 0) {
+				ixmax = core_mini32(ixmax, row_uvw_floor[0]);
+			} else if (row_uvw_[0] != 0) {
+				ixmin = core_maxi32(ixmin, row_uvw_ceil[0]);
+			}
+
+			if (dy20 > 0) {
+				ixmax = core_mini32(ixmax, row_uvw_floor[1]);
+			} else if (row_uvw_[1] != 0) {
+				ixmin = core_maxi32(ixmin, row_uvw_ceil[1]);
+			}
+
+			if (dy01_dy20 < 0 && row_uvw_[2] >= 0) {
+				ixmax = core_mini32(ixmax, -row_uvw_ceil[2]);
+			} else if (dy01_dy20 > 0 && row_uvw_[2] < 0) {
+				ixmin = core_maxi32(ixmin, -row_uvw_floor[2]);
+			}
+		}
+
+		if (ixmin <= ixmax) {
+			// Calculate normalized barycentric coordinates at ixmin of the current row of pixels.
+			const __m128i imm_p0uvw_ = _mm_add_epi32(imm_row_uvw_, _mm_mullo_epi32(_mm_set1_epi32(ixmin), imm_x_duvw_));
+			const __m128 xmm_p0uvw_ = _mm_mul_ps(_mm_cvtepi32_ps(imm_p0uvw_), xmm_inv_area);
+			const __m128 xmm_p0uvuv = _mm_shuffle_ps(xmm_p0uvw_, xmm_p0uvw_, _MM_SHUFFLE(1, 0, 1, 0));
+
+			// Calculate barycentric coordinates for the 4 pixels.
+			const __m128 xmm_p0uv_p1uv = _mm_add_ps(xmm_p0uvuv, xmm_x_duv0_duv1); // Barycentric coordinates of 1st and 2nd pixels
+			const __m128 xmm_p2uv_p3uv = _mm_add_ps(xmm_p0uvuv, xmm_x_duv2_duv3); // Barycentric coordinates of 3rd and 4th pixels
+
+			// Extract barycentric coordinates for each pixel
+			__m128 xmm_u0123 = _mm_shuffle_ps(xmm_p0uv_p1uv, xmm_p2uv_p3uv, _MM_SHUFFLE(2, 0, 2, 0));
+			__m128 xmm_v0123 = _mm_shuffle_ps(xmm_p0uv_p1uv, xmm_p2uv_p3uv, _MM_SHUFFLE(3, 1, 3, 1));
+
+			uint32_t* frameBuffer = &framebufferRow[ixmin];
+			const uint32_t numPixels = (uint32_t)((ixmax - ixmin) + 1);
+			const uint32_t numIter = numPixels >> 2; // 4 pixels per iteration
+			for (uint32_t iIter = 0; iIter < numIter; ++iIter) {
+				// Calculate the color of each pixel
+				const __m128 xmm_r_p0123 = _mm_add_ps(xmm_r0, _mm_add_ps(_mm_mul_ps(xmm_dr20, xmm_u0123), _mm_mul_ps(xmm_dr10, xmm_v0123)));
+				const __m128 xmm_g_p0123 = _mm_add_ps(xmm_g0, _mm_add_ps(_mm_mul_ps(xmm_dg20, xmm_u0123), _mm_mul_ps(xmm_dg10, xmm_v0123)));
+				const __m128 xmm_b_p0123 = _mm_add_ps(xmm_b0, _mm_add_ps(_mm_mul_ps(xmm_db20, xmm_u0123), _mm_mul_ps(xmm_db10, xmm_v0123)));
+				const __m128 xmm_a_p0123 = _mm_add_ps(xmm_a0, _mm_add_ps(_mm_mul_ps(xmm_da20, xmm_u0123), _mm_mul_ps(xmm_da10, xmm_v0123)));
+
+				// Pack into uint8_t
+				// (uint8_t){ r0, r1, r2, r3, g0, g1, g2, g3, b0, b1, b2, b3, a0, a1, a2, a3 }
+				const __m128i imm_r0123_g0123_b0123_a0123_u8 = _mm_packus_epi16(
+					_mm_packs_epi32(_mm_cvtps_epi32(xmm_r_p0123), _mm_cvtps_epi32(xmm_g_p0123)),
+					_mm_packs_epi32(_mm_cvtps_epi32(xmm_b_p0123), _mm_cvtps_epi32(xmm_a_p0123))
+				);
+
+				// Shuffle into RGBA uint32_t
+				const __m128i mask = _mm_set_epi8(15, 11, 7, 3, 14, 10, 6, 2, 13, 9, 5, 1, 12, 8, 4, 0);
+				const __m128i imm_rgba_p0123_u8 = _mm_shuffle_epi8(imm_r0123_g0123_b0123_a0123_u8, mask);
+
+				// Store
+				_mm_storeu_si128((__m128i*)frameBuffer, imm_rgba_p0123_u8);
+
+				// Move on to the next set of pixels
+				xmm_u0123 = _mm_add_ps(xmm_u0123, xmm_x_du4);
+				xmm_v0123 = _mm_add_ps(xmm_v0123, xmm_x_dv4);
+				frameBuffer += 4;
+			}
+
+			// Calculate the colors of the 4 next pixels and selectively store only the number 
+			// of remainder pixels for this row
+			const uint32_t rem = numPixels & 3;
+			{
+				// Calculate the color of each pixel
+				const __m128 xmm_r_p0123 = _mm_add_ps(xmm_r0, _mm_add_ps(_mm_mul_ps(xmm_dr20, xmm_u0123), _mm_mul_ps(xmm_dr10, xmm_v0123)));
+				const __m128 xmm_g_p0123 = _mm_add_ps(xmm_g0, _mm_add_ps(_mm_mul_ps(xmm_dg20, xmm_u0123), _mm_mul_ps(xmm_dg10, xmm_v0123)));
+				const __m128 xmm_b_p0123 = _mm_add_ps(xmm_b0, _mm_add_ps(_mm_mul_ps(xmm_db20, xmm_u0123), _mm_mul_ps(xmm_db10, xmm_v0123)));
+				const __m128 xmm_a_p0123 = _mm_add_ps(xmm_a0, _mm_add_ps(_mm_mul_ps(xmm_da20, xmm_u0123), _mm_mul_ps(xmm_da10, xmm_v0123)));
+
+				// Pack into uint8_t
+				// (uint8_t){ r0, r1, r2, r3, g0, g1, g2, g3, b0, b1, b2, b3, a0, a1, a2, a3 }
+				const __m128i imm_r0123_g0123_b0123_a0123_u8 = _mm_packus_epi16(
+					_mm_packs_epi32(_mm_cvtps_epi32(xmm_r_p0123), _mm_cvtps_epi32(xmm_g_p0123)),
+					_mm_packs_epi32(_mm_cvtps_epi32(xmm_b_p0123), _mm_cvtps_epi32(xmm_a_p0123))
+				);
+
+				// Shuffle into RGBA uint32_t
+				const __m128i mask = _mm_set_epi8(15, 11, 7, 3, 14, 10, 6, 2, 13, 9, 5, 1, 12, 8, 4, 0);
+				const __m128i imm_rgba_p0123_u8 = _mm_shuffle_epi8(imm_r0123_g0123_b0123_a0123_u8, mask);
+
+				// Load existing frame buffer values.
+				const __m128i imm_frameBuffer = _mm_lddqu_si128((const __m128i*)frameBuffer);
+
+				// Replace only the number of remainder pixels
+				const __m128 blendMask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_set_epi32(rem, rem, rem, rem), _mm_set_epi32(3, 2, 1, 0)));
+				const __m128i xmm_newFrameBuffer = _mm_castps_si128(_mm_blendv_ps(_mm_castsi128_ps(imm_frameBuffer), _mm_castsi128_ps(imm_rgba_p0123_u8), blendMask));
+
+				// Store
+				_mm_storeu_si128((__m128i*)frameBuffer, xmm_newFrameBuffer);
+			}
+		}
+
+		// Move on to the next row of pixels.
+		imm_row_uvw_ = _mm_add_epi32(imm_row_uvw_, imm_y_duvw_);
+		framebufferRow += ctx->m_Width;
+	}
+}
+#endif
