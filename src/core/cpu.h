@@ -85,6 +85,6 @@ static const core_cpu_version* core_cpuGetVersionInfo(void);
 }
 #endif
 
-#endif // CORE_CPU_H
-
 #include "inline/cpu.inl"
+
+#endif // CORE_CPU_H

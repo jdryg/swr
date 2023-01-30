@@ -108,6 +108,6 @@ static int32_t core_osFsCreateDirectory(core_file_base_dir baseDir, const char* 
 }
 #endif
 
-#endif // CORE_OS_H
-
 #include "inline/os.inl"
+
+#endif // CORE_OS_H

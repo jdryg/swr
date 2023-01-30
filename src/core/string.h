@@ -73,6 +73,6 @@ static uint32_t core_utf8len(const char* str);
 }
 #endif
 
-#endif // CORE_STRING_H
-
 #include "inline/string.inl"
+
+#endif // CORE_STRING_H
