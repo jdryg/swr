@@ -14,12 +14,12 @@ typedef struct swr_edge
 	int32_t m_dy;
 } swr_edge;
 
-typedef struct swr_vertex_attrib
+typedef struct swr_vertex_attrib_data
 {
 	vec4f m_Val2;
 	vec4f m_dVal02;
 	vec4f m_dVal12;
-} swr_vertex_attrib;
+} swr_vertex_attrib_data;
 
 static inline swr_edge swr_edgeInit(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
@@ -40,16 +40,16 @@ static inline int32_t swr_edgeEval(swr_edge edge, int32_t x, int32_t y)
 		;
 }
 
-static inline swr_vertex_attrib swr_vertexAttribInit(vec4f v2, vec4f dv02, vec4f dv12)
+static inline swr_vertex_attrib_data swr_vertexAttribInit(vec4f v2, vec4f dv02, vec4f dv12)
 {
-	return (swr_vertex_attrib){
+	return (swr_vertex_attrib_data){
 		.m_Val2 = v2,
 		.m_dVal02 = dv02,
 		.m_dVal12 = dv12
 	};
 }
 
-static inline vec4f swr_vertexAttribEval(swr_vertex_attrib va, vec4f w0, vec4f w1)
+static inline vec4f swr_vertexAttribEval(swr_vertex_attrib_data va, vec4f w0, vec4f w1)
 {
 	return vec4f_madd(va.m_dVal02, w0, vec4f_madd(va.m_dVal12, w1, va.m_Val2));
 }
@@ -93,10 +93,10 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	const vec4f v_c02 = vec4f_sub(v_c0, v_c2);
 	const vec4f v_c12 = vec4f_sub(v_c1, v_c2);
 
-	const swr_vertex_attrib va_r = swr_vertexAttribInit(vec4f_getXXXX(v_c2), vec4f_getXXXX(v_c02), vec4f_getXXXX(v_c12));
-	const swr_vertex_attrib va_g = swr_vertexAttribInit(vec4f_getYYYY(v_c2), vec4f_getYYYY(v_c02), vec4f_getYYYY(v_c12));
-	const swr_vertex_attrib va_b = swr_vertexAttribInit(vec4f_getZZZZ(v_c2), vec4f_getZZZZ(v_c02), vec4f_getZZZZ(v_c12));
-	const swr_vertex_attrib va_a = swr_vertexAttribInit(vec4f_getWWWW(v_c2), vec4f_getWWWW(v_c02), vec4f_getWWWW(v_c12));
+	const swr_vertex_attrib_data va_r = swr_vertexAttribInit(vec4f_getXXXX(v_c2), vec4f_getXXXX(v_c02), vec4f_getXXXX(v_c12));
+	const swr_vertex_attrib_data va_g = swr_vertexAttribInit(vec4f_getYYYY(v_c2), vec4f_getYYYY(v_c02), vec4f_getYYYY(v_c12));
+	const swr_vertex_attrib_data va_b = swr_vertexAttribInit(vec4f_getZZZZ(v_c2), vec4f_getZZZZ(v_c02), vec4f_getZZZZ(v_c12));
+	const swr_vertex_attrib_data va_a = swr_vertexAttribInit(vec4f_getWWWW(v_c2), vec4f_getWWWW(v_c02), vec4f_getWWWW(v_c12));
 
 	// Barycentric coordinate normalization
 	const vec4f v_inv_area = vec4f_fromFloat(1.0f / (float)iarea);

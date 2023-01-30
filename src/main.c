@@ -8,6 +8,7 @@
 #include "core/os.h"
 #include "core/string.h"
 #include "core/memory.h"
+#include "core/math.h"
 #include "swr/swr.h"
 #include "fonts/font8x8_basic.h"
 #include "m6502_mesh.h"
@@ -30,6 +31,8 @@ typedef struct drawcall_t
 	uint32_t m_BaseVertex;
 	uint32_t m_BaseIndex;
 	uint32_t m_NumIndices;
+	uint16_t m_MinIndex;
+	uint16_t m_MaxIndex;
 } drawcall_t;
 
 #define MOVING_AVG_NUM_SAMPLES 512
@@ -117,45 +120,23 @@ int32_t main(void)
 			const float padX = ((float)kWinWidth - size) * 0.5f;
 			const float padY = ((float)kWinHeight - size) * 0.5f;
 
-			// Transform vertices to screen space
-			{
-				const uint32_t numVertices = mesh.m_NumVertices;
-				const float* vertexPosf = mesh.m_PosBuffer;
-				int32_t* vertexPosi = transformedVertices;
-				for (uint32_t i = 0; i < numVertices; ++i) {
-					const float fx = vertexPosf[i * 2 + 0];
-					const float fy = vertexPosf[i * 2 + 1];
-					const int32_t ix = (int32_t)(((fx - 215.0f) / (8984.0f - 215.0f)) * size + padX);
-					const int32_t iy = (int32_t)(((fy - 180.0f) / (9808.0f - 180.0f)) * size + padY);
-					vertexPosi[i * 2 + 0] = ix;
-					vertexPosi[i * 2 + 1] = iy;
-				}
-			}
+			swr_matrix2d mtx;
+			swrMatrix2DIdentity(&mtx);
+			swrMatrix2DTranslate(&mtx, padX, padY);
+			swrMatrix2DScale(&mtx, size, size);
+			swrMatrix2DScale(&mtx, 1.0f / (8984.0f - 215.0f), 1.0f / (9808.0f - 180.0f));
+			swrMatrix2DTranslate(&mtx, -215.0f, -180.0f);
 
+			swr->setWorldToScreenTransform(swrCtx, &mtx);
+			swr->bindVertexBuffer(swrCtx, SWR_VERTEX_ATTRIB_POSITION, SWR_FORMAT_2F, 0, mesh.m_NumVertices, mesh.m_PosBuffer);
+			swr->bindVertexBuffer(swrCtx, SWR_VERTEX_ATTRIB_COLOR, SWR_FORMAT_4UB, 0, mesh.m_NumVertices, mesh.m_ColorBuffer);
+			swr->bindIndexBuffer(swrCtx, mesh.m_NumIndices, mesh.m_IndexBuffer);
 			for (uint32_t idc = 0; idc < numDrawCalls; ++idc) {
 				const drawcall_t* curDC = &drawCalls[idc];
-				const uint16_t* ib = &mesh.m_IndexBuffer[curDC->m_BaseIndex];
-				const int32_t* posVB = &transformedVertices[curDC->m_BaseVertex * 2];
-				const uint32_t* colorVB = &mesh.m_ColorBuffer[curDC->m_BaseVertex];
-
-				const uint32_t numTriangles = curDC->m_NumIndices / 3;
-				for (uint32_t i = 0; i < numTriangles; ++i) {
-					const uint16_t id0 = *ib++;
-					const uint16_t id1 = *ib++;
-					const uint16_t id2 = *ib++;
-
-					const int32_t x0 = posVB[id0 * 2 + 0];
-					const int32_t y0 = posVB[id0 * 2 + 1];
-					const int32_t x1 = posVB[id1 * 2 + 0];
-					const int32_t y1 = posVB[id1 * 2 + 1];
-					const int32_t x2 = posVB[id2 * 2 + 0];
-					const int32_t y2 = posVB[id2 * 2 + 1];
-					const uint32_t c0 = colorVB[id0];
-					const uint32_t c1 = colorVB[id1];
-					const uint32_t c2 = colorVB[id2];
-
-					swr->drawTriangle(swrCtx, x0, y0, x1, y1, x2, y2, c0, c1, c2);
-				}
+				const uint32_t numIndices = curDC->m_NumIndices;
+				const uint16_t startIndex = curDC->m_MinIndex;
+				const uint16_t endIndex = curDC->m_MaxIndex;
+				swr->drawPrimitives(swrCtx, SWR_PRIMITIVE_TYPE_TRIANGLE_LIST, startIndex, endIndex, numIndices, curDC->m_BaseIndex, curDC->m_BaseVertex);
 			}
 		}
 		const uint64_t tDelta = core_osTimeDiff(core_osTimeNow(), tStart);
@@ -183,7 +164,7 @@ int32_t main(void)
 			swr->drawText(swrCtx, &font, 8, 16, str, NULL, SWR_COLOR_WHITE);
 		}
 
-		const int32_t winState = mfb_update(window, swr->getFrameBufferPtr(swrCtx));
+		const int32_t winState = mfb_update(window, (void*)swr->getFrameBufferPtr(swrCtx));
 		if (winState < 0) {
 			window = NULL;
 			break;
@@ -244,6 +225,8 @@ static bool meshBuild6502(mesh_t* m, drawcall_t** drawCalls, uint32_t* numDrawCa
 
 		const uint32_t baseVertexID = numVertices;
 		const uint32_t baseIndexID = numIndices;
+		uint16_t minIndex = UINT16_MAX;
+		uint16_t maxIndex = 0;
 
 		const uint32_t meshColor = palette[iMesh];
 
@@ -306,14 +289,19 @@ static bool meshBuild6502(mesh_t* m, drawcall_t** drawCalls, uint32_t* numDrawCa
 					}
 				}
 
-				indexBuffer[numIndices++] = (uint16_t)(vertexID - baseVertexID);
+				const uint16_t index = (uint16_t)(vertexID - baseVertexID);
+				indexBuffer[numIndices++] = index;
+				minIndex = core_minu16(minIndex, index);
+				maxIndex = core_maxu16(maxIndex, index);
 			}
 		}
 
 		dc[iMesh] = (drawcall_t){
 			.m_BaseVertex = baseVertexID,
 			.m_BaseIndex = baseIndexID,
-			.m_NumIndices = numIndices - baseIndexID
+			.m_NumIndices = numIndices - baseIndexID,
+			.m_MinIndex = minIndex,
+			.m_MaxIndex = maxIndex
 		};
 	}
 

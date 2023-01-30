@@ -190,6 +190,7 @@
     <None Include="src\core\inline\memory.inl" />
     <None Include="src\core\inline\os.inl" />
     <None Include="src\core\inline\string.inl" />
+    <None Include="src\swr\inline\swr.inl" />
     <None Include="src\swr\inline\swr_vec_math_ref.inl" />
     <None Include="src\swr\inline\swr_vec_math_sse41.inl" />
     <None Include="src\swr\inline\swr_vec_math_ssse3.inl" />

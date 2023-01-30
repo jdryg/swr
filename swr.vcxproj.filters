@@ -187,5 +187,8 @@
     <None Include="src\swr\inline\swr_vec_math_sse41.inl">
       <Filter>src\swr\inline</Filter>
     </None>
+    <None Include="src\swr\inline\swr.inl">
+      <Filter>src\swr\inline</Filter>
+    </None>
   </ItemGroup>
 </Project>
