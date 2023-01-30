@@ -23,10 +23,13 @@ static void core_memMove(void* dst, const void* src, size_t n);
 static void core_memSet(void* dst, uint8_t ch, size_t n);
 static int32_t core_memCmp(const void* lhs, const void* rhs, size_t n);
 
+static bool core_isAlignedPtr(const void* ptr, uint64_t alignment);
+static void* core_alignPtr(void* ptr, uint64_t alignment);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // CORE_MEMORY_H
-
 #include "inline/memory.inl"
+
+#endif // CORE_MEMORY_H
