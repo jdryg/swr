@@ -53,13 +53,6 @@ typedef enum swr_vertex_attrib
 	SWR_VERTEX_ATTRIB_COLOR
 } swr_vertex_attrib;
 
-typedef enum swr_data_type
-{
-	SWR_DATA_TYPE_FLOAT,
-	SWR_DATA_TYPE_UBYTE,
-	SWR_DATA_TYPE_UINT,
-} swr_data_type;
-
 typedef enum swr_format
 {
 	SWR_FORMAT_2F,
