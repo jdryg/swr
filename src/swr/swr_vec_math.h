@@ -53,6 +53,10 @@ static vec4f vec4f_mul(vec4f a, vec4f b);
 static vec4f vec4f_floor(vec4f x);
 static vec4f vec4f_ceil(vec4f x);
 static vec4f vec4f_madd(vec4f a, vec4f b, vec4f c);
+static float vec4f_getX(vec4f a);
+static float vec4f_getY(vec4f a);
+static float vec4f_getZ(vec4f a);
+static float vec4f_getW(vec4f a);
 static vec4f vec4f_getXXXX(vec4f x);
 static vec4f vec4f_getYYYY(vec4f x);
 static vec4f vec4f_getZZZZ(vec4f x);
@@ -70,6 +74,7 @@ static void vec4i_toInt4vu(vec4i x, int32_t* arr);
 static void vec4i_toInt4va(vec4i x, int32_t* arr);
 static void vec4i_toInt4va_masked(vec4i x, vec4i mask, int32_t* buffer);
 static void vec4i_toInt4va_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer);
+static void vec4i_toInt4vu_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer);
 static int32_t vec4i_toInt(vec4i x);
 static vec4i vec4i_add(vec4i a, vec4i b);
 static vec4i vec4i_sub(vec4i a, vec4i b);
@@ -91,8 +96,6 @@ static uint32_t vec4i_getSignMask(vec4i x);
 }
 #endif
 
-#endif // SWR_SWR_VEC_MATH_H
-
 #if defined(SWR_VEC_MATH_SSE2)
 #include "inline/swr_vec_math_sse2.inl"
 #elif defined(SWR_VEC_MATH_SSSE3)
@@ -102,3 +105,5 @@ static uint32_t vec4i_getSignMask(vec4i x);
 #else
 #include "inline/swr_vec_math_ref.inl"
 #endif
+
+#endif // SWR_SWR_VEC_MATH_H

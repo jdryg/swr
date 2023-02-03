@@ -69,6 +69,26 @@ static inline vec4f vec4f_madd(vec4f a, vec4f b, vec4f c)
 	return VEC4F(a.m_Elem[0] * b.m_Elem[0] + c.m_Elem[0], a.m_Elem[1] * b.m_Elem[1] + c.m_Elem[1], a.m_Elem[2] * b.m_Elem[2] + c.m_Elem[2], a.m_Elem[3] * b.m_Elem[3] + c.m_Elem[3]);
 }
 
+static inline float vec4f_getX(vec4f a)
+{
+	return a.m_Elem[0];
+}
+
+static inline float vec4f_getY(vec4f a)
+{
+	return a.m_Elem[1];
+}
+
+static inline float vec4f_getZ(vec4f a)
+{
+	return a.m_Elem[2];
+}
+
+static inline float vec4f_getW(vec4f a)
+{
+	return a.m_Elem[3];
+}
+
 #define VEC4F_GET_FUNC(swizzle) \
 static inline vec4f vec4f_get##swizzle(vec4f x) \
 { \

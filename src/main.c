@@ -13,6 +13,9 @@
 #include "fonts/font8x8_basic.h"
 #include "m6502_mesh.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
 static const uint32_t kWinWidth = 1280;
 static const uint32_t kWinHeight = 720;
 
@@ -68,6 +71,8 @@ static bool meshBuild6502(mesh_t* m, drawcall_t** drawCalls, uint32_t* numDrawCa
 
 int32_t main(void)
 {
+	SetThreadAffinityMask(GetCurrentThread(), 2);
+
 	coreInit(CORE_CPU_FEATURE_MASK_ALL);
 
 	core_allocator_i* allocator = core_allocatorCreateAllocator("app");

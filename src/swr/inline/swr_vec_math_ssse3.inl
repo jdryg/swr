@@ -84,6 +84,26 @@ static inline vec4f vec4f_madd(vec4f a, vec4f b, vec4f c)
 	return VEC4F(_mm_add_ps(c.m_XMM, _mm_mul_ps(a.m_XMM, b.m_XMM)));
 }
 
+static inline float vec4f_getX(vec4f a)
+{
+	return _mm_cvtss_f32(a.m_XMM);
+}
+
+static inline float vec4f_getY(vec4f a)
+{
+	return _mm_cvtss_f32(_mm_shuffle_ps(a.m_XMM, a.m_XMM, _MM_SHUFFLE(1, 1, 1, 1)));
+}
+
+static inline float vec4f_getZ(vec4f a)
+{
+	return _mm_cvtss_f32(_mm_shuffle_ps(a.m_XMM, a.m_XMM, _MM_SHUFFLE(2, 2, 2, 2)));
+}
+
+static inline float vec4f_getW(vec4f a)
+{
+	return _mm_cvtss_f32(_mm_shuffle_ps(a.m_XMM, a.m_XMM, _MM_SHUFFLE(3, 3, 3, 3)));
+}
+
 #define VEC4F_GET_FUNC(swizzle) \
 static inline vec4f vec4f_get##swizzle(vec4f x) \
 { \
