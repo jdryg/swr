@@ -417,14 +417,15 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	};
 
 	if (bboxWidth <= 4 && bboxHeight <= 4) {
-		int32_t tileX = bboxMinX; 
-		if (bboxMinX + 4 >= (int32_t)ctx->m_Width) {
-			tileX = ctx->m_Width - 4;
-		}
-		int32_t tileY = bboxMinY;
-		if (bboxMinY + 4 >= (int32_t)ctx->m_Height) {
-			tileY = ctx->m_Height - 4;
-		}
+		const int32_t tileX = (bboxMinX + 4 >= (int32_t)ctx->m_Width)
+			? ctx->m_Width - 4
+			: bboxMinX
+			;
+
+		const int32_t tileY = (bboxMinY + 4 >= (int32_t)ctx->m_Height)
+			? ctx->m_Height - 4
+			: bboxMinY
+			;
 		tile.blockMin_w[0] = swr_edgeEval(edge0, tileX, tileY);
 		tile.blockMin_w[1] = swr_edgeEval(edge1, tileX, tileY);
 		tile.blockMin_w[2] = swr_edgeEval(edge2, tileX, tileY);
