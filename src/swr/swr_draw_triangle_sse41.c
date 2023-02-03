@@ -6,7 +6,8 @@
 #define SWR_VEC_MATH_SSE41
 #include "swr_vec_math.h"
 
-#define SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL 1
+#define SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL  1
+#define SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION 1
 
 typedef struct swr_edge
 {
@@ -416,6 +417,7 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 		.v_inv_area = v_inv_area
 	};
 
+#if SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
 	if (bboxWidth <= 4 && bboxHeight <= 4) {
 		const int32_t tileX = (bboxMinX + 4 >= (int32_t)ctx->m_Width)
 			? ctx->m_Width - 4
@@ -432,6 +434,7 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 		swr_drawTile4x4_partial_unaligned(tile, va_r, va_g, va_b, va_a, &ctx->m_FrameBuffer[tileX + tileY * ctx->m_Width], ctx->m_Width);
 		return;
 	}
+#endif
 
 	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
 	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
