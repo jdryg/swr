@@ -325,7 +325,7 @@ extern void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32
 
 static void swrDrawTriangleDispatch(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
 {
-#if 0
+#if 1
 	const uint64_t cpuFeatures = core_cpuGetFeatures();
 	if ((cpuFeatures & CORE_CPU_FEATURE_SSE4_1) != 0) {
 		swr->drawTriangle = swrDrawTriangleSSE41;
