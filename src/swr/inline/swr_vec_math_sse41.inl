@@ -166,7 +166,7 @@ static __forceinline void vec4i_toInt4va_maskedInv(vec4i x, vec4i maskInv, int32
 
 static __forceinline void vec4i_toInt4vu_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer)
 {
-	const __m128i old = _mm_loadu_si128((const __m128i*)buffer);
+	const __m128i old = _mm_lddqu_si128((const __m128i*)buffer);
 	const __m128i oldMasked = _mm_and_si128(maskInv.m_IMM, old);
 	const __m128i newMasked = _mm_andnot_si128(maskInv.m_IMM, x.m_IMM);
 	const __m128i final = _mm_or_si128(oldMasked, newMasked);

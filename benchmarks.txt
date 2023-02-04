@@ -1,0 +1,62 @@
+SSE4.1: SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL + SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
+zoom: 680.0, avg: 4.84, stddev: 0.0895
+zoom: 1000.0, avg: 5.67, stddev: 0.0753
+zoom: 2000.0, avg: 4.49, stddev: 0.0564
+zoom: 4000.0, avg: 2.71, stddev: 0.0372
+zoom: 8000.0, avg: 2.02, stddev: 0.0226
+zoom: 16000.0, avg: 1.77, stddev: 0.0250
+zoom: 32000.0, avg: 1.57, stddev: 0.0204
+
+SSE4.1: SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
+zoom: 680.0, avg: 5.17, stddev: 0.0842
+zoom: 1000.0, avg: 6.16, stddev: 0.0917
+zoom: 2000.0, avg: 4.91, stddev: 0.0599
+zoom: 4000.0, avg: 2.97, stddev: 0.0572
+zoom: 8000.0, avg: 2.09, stddev: 0.0584
+zoom: 16000.0, avg: 1.82, stddev: 0.0327
+zoom: 32000.0, avg: 1.54, stddev: 0.0200
+
+SSE4.1: SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
+zoom: 680.0, avg: 5.77, stddev: 0.1129
+zoom: 1000.0, avg: 6.21, stddev: 0.1346
+zoom: 2000.0, avg: 4.49, stddev: 0.1006
+zoom: 4000.0, avg: 2.71, stddev: 0.0579
+zoom: 8000.0, avg: 2.00, stddev: 0.0405
+zoom: 16000.0, avg: 1.76, stddev: 0.0474
+zoom: 32000.0, avg: 1.55, stddev: 0.0223
+
+SSE4.1: No flag set
+zoom: 680.0, avg: 5.92, stddev: 0.1099
+zoom: 1000.0, avg: 6.34, stddev: 0.1030
+zoom: 2000.0, avg: 4.56, stddev: 0.0757
+zoom: 4000.0, avg: 2.75, stddev: 0.0463
+zoom: 8000.0, avg: 1.95, stddev: 0.0761
+zoom: 16000.0, avg: 1.64, stddev: 0.0407
+zoom: 32000.0, avg: 1.44, stddev: 0.0157
+
+Ref
+zoom: 680.0, avg: 6.67, stddev: 0.1016
+zoom: 1000.0, avg: 8.03, stddev: 0.1243
+zoom: 2000.0, avg: 7.01, stddev: 0.0740
+zoom: 4000.0, avg: 5.22, stddev: 0.2464
+zoom: 8000.0, avg: 4.46, stddev: 0.0357
+zoom: 16000.0, avg: 4.97, stddev: 0.0420
+zoom: 32000.0, avg: 4.90, stddev: 0.0426
+
+Ref: SWR_CONFIG_DISABLE_PIXEL_SHADERS
+zoom: 680.0, avg: 4.29, stddev: 0.0960
+zoom: 1000.0, avg: 4.84, stddev: 0.0924
+zoom: 2000.0, avg: 3.68, stddev: 0.1036
+zoom: 4000.0, avg: 1.93, stddev: 0.0351
+zoom: 8000.0, avg: 1.20, stddev: 0.0261
+zoom: 16000.0, avg: 0.91, stddev: 0.0250
+zoom: 32000.0, avg: 0.74, stddev: 0.0193
+
+SSE4.1: Old implementation
+zoom: 680.0, avg: 5.01, stddev: 0.1211
+zoom: 1000.0, avg: 5.51, stddev: 0.0932
+zoom: 2000.0, avg: 4.27, stddev: 0.0986
+zoom: 4000.0, avg: 2.55, stddev: 0.0581
+zoom: 8000.0, avg: 1.79, stddev: 0.0207
+zoom: 16000.0, avg: 1.51, stddev: 0.0214
+zoom: 32000.0, avg: 1.27, stddev: 0.0199

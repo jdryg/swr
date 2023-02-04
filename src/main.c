@@ -2,6 +2,8 @@
 #include <memory.h>
 #include <stdlib.h> // rand
 #include <MiniFB.h>
+#include <stdio.h>
+#include <math.h> // sqrtf
 #include "core/core.h"
 #include "core/cpu.h"
 #include "core/allocator.h"
@@ -113,6 +115,17 @@ int32_t main(void)
 	movavgd_t frameTimeAvg;
 	core_memSet(&frameTimeAvg, 0, sizeof(movavgd_t));
 
+	const float zoomLevels[] = {
+		680.0f,
+		1000.0f,
+		2000.0f,
+		4000.0f,
+		8000.0f,
+		16000.0f,
+		32000.0f
+	};
+
+	uint32_t curZoomLevelID = 0;
 	uint32_t frameID = 0;
 	do {
 		++frameID;
@@ -121,7 +134,7 @@ int32_t main(void)
 
 		const uint64_t tStart = core_osTimeNow();
 		{
-			const float size = 680.0f;
+			const float size = zoomLevels[curZoomLevelID];
 			const float padX = ((float)kWinWidth - size) * 0.5f;
 			const float padY = ((float)kWinHeight - size) * 0.5f;
 
@@ -149,24 +162,28 @@ int32_t main(void)
 		const double dt_ms = core_osTimeConvertTo(tDelta, CORE_TIME_UNITS_MS);
 		movAvgPush(&frameTimeAvg, dt_ms);
 
-		{
-			stats_t s;
-			movAvgGetStats(&frameTimeAvg, &s);
+		stats_t s;
+		movAvgGetStats(&frameTimeAvg, &s);
 
-			char str[256];
-			core_snprintf(str, CORE_COUNTOF(str), "Frame Time: %.2fms (min: %.2f, 25th: %.2f, med: %.2f, 75th: %.2f, max: %.2f, avg: %.2f, stddev: %.4f)", dt_ms
-				, s.m_Min
-				, s.m_Percent25
-				, s.m_Median
-				, s.m_Percent75
-				, s.m_Max
-				, s.m_Average
-				, s.m_StdDev
-			);
-			swr->drawText(swrCtx, &font, 8, 8, str, NULL, SWR_COLOR_WHITE);
+		char str[256];
+		core_snprintf(str, CORE_COUNTOF(str), "Frame Time: %.2fms (min: %.2f, 25th: %.2f, med: %.2f, 75th: %.2f, max: %.2f, avg: %.2f, stddev: %.4f)", dt_ms
+			, s.m_Min
+			, s.m_Percent25
+			, s.m_Median
+			, s.m_Percent75
+			, s.m_Max
+			, s.m_Average
+			, s.m_StdDev
+		);
+		swr->drawText(swrCtx, &font, 8, 8, str, NULL, SWR_COLOR_WHITE);
 
-			core_snprintf(str, CORE_COUNTOF(str), "Frame ID: %u\n", frameID);
-			swr->drawText(swrCtx, &font, 8, 16, str, NULL, SWR_COLOR_WHITE);
+		core_snprintf(str, CORE_COUNTOF(str), "Frame ID: %u\n", frameID);
+		swr->drawText(swrCtx, &font, 8, 16, str, NULL, SWR_COLOR_WHITE);
+		
+		if (frameID >= 2 * MOVING_AVG_NUM_SAMPLES) {
+			printf("zoom: %.1f, avg: %.2f, stddev: %.4f\n", zoomLevels[curZoomLevelID], s.m_Average, s.m_StdDev);
+			frameID = 0;
+			curZoomLevelID = (curZoomLevelID + 1) % CORE_COUNTOF(zoomLevels);
 		}
 
 		const int32_t winState = mfb_update(window, (void*)swr->getFrameBufferPtr(swrCtx));

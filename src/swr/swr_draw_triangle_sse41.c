@@ -574,6 +574,9 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	const int32_t bboxMaxY = core_mini32(core_max3i32(y0, y1, y2), (int32_t)ctx->m_Height - 1);
 	const int32_t bboxWidth = bboxMaxX - bboxMinX;
 	const int32_t bboxHeight = bboxMaxY - bboxMinY;
+	if (bboxWidth <= 0 || bboxHeight <= 0) {
+		return;
+	}
 
 	const __m128i imm_zero = _mm_setzero_si128();
 	const __m128 xmm_rgba0 = _mm_cvtepi32_ps(_mm_unpacklo_epi16(_mm_unpacklo_epi8(_mm_loadu_si32(&color0), imm_zero), imm_zero));

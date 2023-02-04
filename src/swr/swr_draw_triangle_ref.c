@@ -54,6 +54,9 @@ void swrDrawTriangleRef(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 	const int32_t maxY = core_mini32(core_max3i32(y0, y1, y2), (int32_t)(ctx->m_Height - 1));
 	const int32_t bboxWidth = maxX - minX;
 	const int32_t bboxHeight = maxY - minY;
+	if (bboxWidth <= 0 || bboxHeight <= 0) {
+		return;
+	}
 
 	// Prepare interpolated attributes
 #if !SWR_CONFIG_DISABLE_PIXEL_SHADERS
