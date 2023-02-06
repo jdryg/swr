@@ -474,6 +474,10 @@ static __forceinline void swr_drawTile8x8_full(swr_tile tile, swr_vertex_attrib_
 	vec8i_toInt8va(v_rgba8, &tileFB[rowStride]);
 	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 2]);
 	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 3]);
+	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 4]);
+	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 5]);
+	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 6]);
+	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 7]);
 #else // SWR_CONFIG_DISABLE_PIXEL_SHADERS
 	const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[0]), tile.v_edge_dx[0]);
 	const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[1]), tile.v_edge_dx[1]);
