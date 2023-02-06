@@ -155,6 +155,10 @@
     <ClCompile Include="src\m6502_mesh.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\swr\swr.c" />
+    <ClCompile Include="src\swr\swr_draw_triangle_avx2_fma.c">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="src\swr\swr_draw_triangle_ref.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_sse2.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_sse41.c" />
@@ -191,6 +195,7 @@
     <None Include="src\core\inline\os.inl" />
     <None Include="src\core\inline\string.inl" />
     <None Include="src\swr\inline\swr.inl" />
+    <None Include="src\swr\inline\swr_vec_math_avx.inl" />
     <None Include="src\swr\inline\swr_vec_math_ref.inl" />
     <None Include="src\swr\inline\swr_vec_math_sse41.inl" />
     <None Include="src\swr\inline\swr_vec_math_ssse3.inl" />

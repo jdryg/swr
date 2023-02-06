@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <smmintrin.h>
+#include <immintrin.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ typedef enum vec4_shuffle_mask
 
 typedef struct vec4f
 {
-#if defined(SWR_VEC_MATH_SSE2) || defined(SWR_VEC_MATH_SSSE3) || defined(SWR_VEC_MATH_SSE41)
+#if defined(SWR_VEC_MATH_SSE2) || defined(SWR_VEC_MATH_SSSE3) || defined(SWR_VEC_MATH_SSE41) || defined(SWR_VEC_MATH_AVX) || defined(SWR_VEC_MATH_AVX2)
 	__m128 m_XMM;
 #else
 	float m_Elem[4];
@@ -34,12 +34,26 @@ typedef struct vec4f
 
 typedef struct vec4i
 {
-#if defined(SWR_VEC_MATH_SSE2) || defined(SWR_VEC_MATH_SSSE3) || defined(SWR_VEC_MATH_SSE41)
+#if defined(SWR_VEC_MATH_SSE2) || defined(SWR_VEC_MATH_SSSE3) || defined(SWR_VEC_MATH_SSE41) || defined(SWR_VEC_MATH_AVX) || defined(SWR_VEC_MATH_AVX2)
 	__m128i m_IMM;
 #else
 	int32_t m_Elem[4];
 #endif
 } vec4i;
+
+#if defined(SWR_VEC_MATH_AVX) || defined(SWR_VEC_MATH_AVX2)
+typedef struct vec8f
+{
+	__m256 m_YMM;
+} vec8f;
+#endif
+
+#if defined(SWR_VEC_MATH_AVX2)
+typedef struct vec8i
+{
+	__m256i m_YMM;
+} vec8i;
+#endif
 
 static vec4f vec4f_zero(void);
 static vec4f vec4f_fromFloat(float x);
@@ -91,6 +105,48 @@ static vec4i vec4i_packR32G32B32A32_to_RGBA8(vec4i r, vec4i g, vec4i b, vec4i a)
 static bool vec4i_anyNegative(vec4i x);
 static bool vec4i_allNegative(vec4i x);
 static uint32_t vec4i_getSignMask(vec4i x);
+static int32_t vec4i_getX(vec4i a);
+static int32_t vec4i_getY(vec4i a);
+static int32_t vec4i_getZ(vec4i a);
+static int32_t vec4i_getW(vec4i a);
+
+#if defined(SWR_VEC_MATH_AVX) || defined(SWR_VEC_MATH_AVX2)
+static vec8f vec8f_zero(void);
+static vec8f vec8f_fromFloat(float x);
+static vec8f vec8f_fromVec8i(vec8i x);
+static vec8f vec8f_fromFloat8(float x0, float x1, float x2, float x3, float x4, float x5, float x6, float x7);
+static vec8f vec8f_add(vec8f a, vec8f b);
+static vec8f vec8f_sub(vec8f a, vec8f b);
+static vec8f vec8f_mul(vec8f a, vec8f b);
+static vec8f vec8f_floor(vec8f x);
+static vec8f vec8f_ceil(vec8f x);
+static vec8f vec8f_madd(vec8f a, vec8f b, vec8f c);
+
+static vec8i vec8i_zero(void);
+static vec8i vec8i_fromInt(int32_t x);
+static vec8i vec8i_fromVec8f(vec8f x);
+static vec8i vec8i_fromInt8(int32_t x0, int32_t x1, int32_t x2, int32_t x3, int32_t x4, int32_t x5, int32_t x6, int32_t x7);
+static vec8i vec8i_fromInt8va(const int32_t* arr);
+static void vec8i_toInt8vu(vec8i x, int32_t* arr);
+static void vec8i_toInt8va(vec8i x, int32_t* arr);
+static void vec8i_toInt8va_masked(vec8i x, vec8i mask, int32_t* buffer);
+static void vec8i_toInt8va_maskedInv(vec8i x, vec8i maskInv, int32_t* buffer);
+static void vec8i_toInt8vu_maskedInv(vec8i x, vec8i maskInv, int32_t* buffer);
+static vec8i vec8i_add(vec8i a, vec8i b);
+static vec8i vec8i_sub(vec8i a, vec8i b);
+static vec8i vec8i_mullo(vec8i a, vec8i b);
+static vec8i vec8i_and(vec8i a, vec8i b);
+static vec8i vec8i_or(vec8i a, vec8i b);
+static vec8i vec8i_or3(vec8i a, vec8i b, vec8i c);
+static vec8i vec8i_andnot(vec8i a, vec8i b);
+static vec8i vec8i_xor(vec8i a, vec8i b);
+static vec8i vec8i_sar(vec8i x, uint32_t shift);
+static vec8i vec8i_sal(vec8i x, uint32_t shift);
+static vec8i vec8i_packR32G32B32A32_to_RGBA8(vec8i r, vec8i g, vec8i b, vec8i a);
+static bool vec8i_anyNegative(vec8i x);
+static bool vec8i_allNegative(vec8i x);
+static uint32_t vec8i_getSignMask(vec8i x);
+#endif
 
 #ifdef __cplusplus
 }
@@ -102,6 +158,8 @@ static uint32_t vec4i_getSignMask(vec4i x);
 #include "inline/swr_vec_math_ssse3.inl"
 #elif defined(SWR_VEC_MATH_SSE41)
 #include "inline/swr_vec_math_sse41.inl"
+#elif defined(SWR_VEC_MATH_AVX) || defined(SWR_VEC_MATH_AVX2)
+#include "inline/swr_vec_math_avx.inl"
 #else
 #include "inline/swr_vec_math_ref.inl"
 #endif

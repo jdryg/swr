@@ -93,6 +93,9 @@
     <ClCompile Include="src\swr\swr_draw_triangle_sse41.c">
       <Filter>src\swr</Filter>
     </ClCompile>
+    <ClCompile Include="src\swr\swr_draw_triangle_avx2_fma.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h">
@@ -188,6 +191,9 @@
       <Filter>src\swr\inline</Filter>
     </None>
     <None Include="src\swr\inline\swr.inl">
+      <Filter>src\swr\inline</Filter>
+    </None>
+    <None Include="src\swr\inline\swr_vec_math_avx.inl">
       <Filter>src\swr\inline</Filter>
     </None>
   </ItemGroup>
