@@ -53,7 +53,7 @@ static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, ui
 	core_memSet(ctx, 0, sizeof(swr_context));
 	ctx->m_BoundBuffers = 0;
 
-	ctx->m_FrameBuffer = (uint32_t*)CORE_ALIGNED_ALLOC(allocator, sizeof(uint32_t) * (size_t)w * (size_t)h, 16);
+	ctx->m_FrameBuffer = (uint32_t*)CORE_ALIGNED_ALLOC(allocator, sizeof(uint32_t) * (size_t)w * (size_t)h, 32);
 	if (!ctx->m_FrameBuffer) {
 		swrDestroyContext(allocator, ctx);
 		return NULL;
@@ -81,7 +81,7 @@ static void swrDestroyContext(core_allocator_i* allocator, swr_context* ctx)
 		ctx->m_TempAllocator = NULL;
 	}
 
-	CORE_ALIGNED_FREE(allocator, ctx->m_FrameBuffer, 16);
+	CORE_ALIGNED_FREE(allocator, ctx->m_FrameBuffer, 32);
 	CORE_FREE(allocator, ctx);
 }
 
