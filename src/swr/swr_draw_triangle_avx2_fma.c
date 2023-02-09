@@ -299,140 +299,6 @@ static __forceinline void swr_drawTile8x8_partial_unaligned(swr_tile tile, swr_v
 #endif // SWR_CONFIG_DISABLE_PIXEL_SHADERS
 }
 
-#if !SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
-static __forceinline void swr_drawTile8x8_full(swr_tile tile, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t* tileFB, uint32_t rowStride)
-{
-#if SWR_CONFIG_DISABLE_PIXEL_SHADERS
-	const vec8i v_rgba8 = vec8i_fromInt(-1);
-	vec8i_toInt8va(v_rgba8, &tileFB[0]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 2]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 3]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 4]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 5]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 6]);
-	vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 7]);
-#else // SWR_CONFIG_DISABLE_PIXEL_SHADERS
-	const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[0]), tile.v_edge_dx[0]);
-	const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[1]), tile.v_edge_dx[1]);
-	const vec8i v_edge0_dy = tile.v_edge_dy[0];
-	const vec8i v_edge1_dy = tile.v_edge_dy[1];
-	const vec8f v_inv_area = tile.v_inv_area;
-
-	const vec8i v_w0_row1 = vec8i_add(v_w0_row0, v_edge0_dy);
-	const vec8i v_w1_row1 = vec8i_add(v_w1_row0, v_edge1_dy);
-	const vec8i v_w0_row2 = vec8i_add(v_w0_row1, v_edge0_dy);
-	const vec8i v_w1_row2 = vec8i_add(v_w1_row1, v_edge1_dy);
-	const vec8i v_w0_row3 = vec8i_add(v_w0_row2, v_edge0_dy);
-	const vec8i v_w1_row3 = vec8i_add(v_w1_row2, v_edge1_dy);
-	const vec8i v_w0_row4 = vec8i_add(v_w0_row3, v_edge0_dy);
-	const vec8i v_w1_row4 = vec8i_add(v_w1_row3, v_edge1_dy);
-	const vec8i v_w0_row5 = vec8i_add(v_w0_row4, v_edge0_dy);
-	const vec8i v_w1_row5 = vec8i_add(v_w1_row4, v_edge1_dy);
-	const vec8i v_w0_row6 = vec8i_add(v_w0_row5, v_edge0_dy);
-	const vec8i v_w1_row6 = vec8i_add(v_w1_row5, v_edge1_dy);
-	const vec8i v_w0_row7 = vec8i_add(v_w0_row6, v_edge0_dy);
-	const vec8i v_w1_row7 = vec8i_add(v_w1_row6, v_edge1_dy);
-
-	// Row 0
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row0), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row0), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[0]);
-	}
-
-	// Row 1
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row1), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row1), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride]);
-	}
-
-	// Row 2
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row2), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row2), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 2]);
-	}
-
-	// Row 3
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row3), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row3), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 3]);
-	}
-
-	// Row 4
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row4), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row4), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 4]);
-	}
-
-	// Row 5
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row5), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row5), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 5]);
-	}
-
-	// Row 6
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row6), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row6), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 6]);
-	}
-
-	// Row 7
-	{
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row7), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row7), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va(v_rgba8, &tileFB[rowStride * 7]);
-	}
-#endif // SWR_CONFIG_DISABLE_PIXEL_SHADERS
-}
-#endif // SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
-
 void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
 {
 	// Make sure the triangle is CCW. If it's not swap points 1 and 2 to make it CCW.
@@ -479,22 +345,25 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	const swr_edge edge1 = swr_edgeInit(x0, y0, x2, y2);
 	const swr_edge edge2 = swr_edgeInit(x1, y1, x0, y0);
 
-	const vec8i v_pixelOffsets = vec8i_fromInt8(0, 1, 2, 3, 4, 5, 6, 7);
-	const vec8i v_edge0_dx = vec8i_mullo(vec8i_fromInt(edge0.m_dx), v_pixelOffsets);
-	const vec8i v_edge1_dx = vec8i_mullo(vec8i_fromInt(edge1.m_dx), v_pixelOffsets);
-	const vec8i v_edge2_dx = vec8i_mullo(vec8i_fromInt(edge2.m_dx), v_pixelOffsets);
+	const vec8i v_edge0_dx = vec8i_fromInt(edge0.m_dx);
+	const vec8i v_edge1_dx = vec8i_fromInt(edge1.m_dx);
+	const vec8i v_edge2_dx = vec8i_fromInt(edge2.m_dx);
 	const vec8i v_edge0_dy = vec8i_fromInt(edge0.m_dy);
 	const vec8i v_edge1_dy = vec8i_fromInt(edge1.m_dy);
 	const vec8i v_edge2_dy = vec8i_fromInt(edge2.m_dy);
 
+	const vec8i v_pixelOffsets = vec8i_fromInt8(0, 1, 2, 3, 4, 5, 6, 7);
+	const vec8i v_edge0_dx_off = vec8i_mullo(v_edge0_dx, v_pixelOffsets);
+	const vec8i v_edge1_dx_off = vec8i_mullo(v_edge1_dx, v_pixelOffsets);
+	const vec8i v_edge2_dx_off = vec8i_mullo(v_edge2_dx, v_pixelOffsets);
+
 	swr_tile tile = {
 		.blockMin_w = { 0, 0, 0 },
-		.v_edge_dx = { v_edge0_dx, v_edge1_dx, v_edge2_dx },
+		.v_edge_dx = { v_edge0_dx_off, v_edge1_dx_off, v_edge2_dx_off },
 		.v_edge_dy = { v_edge0_dy, v_edge1_dy, v_edge2_dy },
 		.v_inv_area = v_inv_area
 	};
 
-#if SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
 	if (bboxWidth <= 8 && bboxHeight <= 8) {
 		const int32_t tileX = (bboxMinX + 8 >= (int32_t)ctx->m_Width)
 			? ctx->m_Width - 8
@@ -511,11 +380,11 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 		swr_drawTile8x8_partial_unaligned(tile, va_r, va_g, va_b, va_a, &ctx->m_FrameBuffer[tileX + tileY * ctx->m_Width], ctx->m_Width);
 		return;
 	}
-#endif
 
+	// 8x1 8x8 block scan
 	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 64);
-	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 8);
 	const int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX, 64);
+	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 8);
 	const int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY, 8);
 
 	// Trivial reject/accept corner offsets relative to block min/max.
@@ -537,27 +406,15 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	const vec8i v_trivialRejectOffset_1 = vec8i_fromInt(vec4i_getY(v_trivialRejectOffset));
 	const vec8i v_trivialRejectOffset_2 = vec8i_fromInt(vec4i_getZ(v_trivialRejectOffset));
 
-	const vec4i v_trivialAcceptOffset = vec4i_sub(vec4i_add(v_w_blockMax_dx, v_w_blockMax_dy), v_trivialRejectOffset);
-	const vec8i v_trivialAcceptOffset_0 = vec8i_fromInt(vec4i_getX(v_trivialAcceptOffset));
-	const vec8i v_trivialAcceptOffset_1 = vec8i_fromInt(vec4i_getY(v_trivialAcceptOffset));
-	const vec8i v_trivialAcceptOffset_2 = vec8i_fromInt(vec4i_getZ(v_trivialAcceptOffset));
-
 	// Rasterize
 	const vec8i v_w0_bboxMin = vec8i_fromInt(swr_edgeEval(edge0, bboxMinX_aligned, bboxMinY_aligned));
 	const vec8i v_w1_bboxMin = vec8i_fromInt(swr_edgeEval(edge1, bboxMinX_aligned, bboxMinY_aligned));
 	const vec8i v_w2_bboxMin = vec8i_fromInt(swr_edgeEval(edge2, bboxMinX_aligned, bboxMinY_aligned));
 
-	const vec8i v_w0_nextBlock_dx = vec8i_fromInt(edge0.m_dx * 64);
-	const vec8i v_w1_nextBlock_dx = vec8i_fromInt(edge1.m_dx * 64);
-	const vec8i v_w2_nextBlock_dx = vec8i_fromInt(edge2.m_dx * 64);
-	const vec8i v_w0_nextBlock_dy = vec8i_fromInt(edge0.m_dy * 8);
-	const vec8i v_w1_nextBlock_dy = vec8i_fromInt(edge1.m_dy * 8);
-	const vec8i v_w2_nextBlock_dy = vec8i_fromInt(edge2.m_dy * 8);
-
 	const vec8i v_blockOffsets = vec8i_fromInt8(0, 8, 16, 24, 32, 40, 48, 56);
-	vec8i v_w0_blockY = vec8i_add(v_w0_bboxMin, vec8i_mullo(vec8i_fromInt(edge0.m_dx), v_blockOffsets));
-	vec8i v_w1_blockY = vec8i_add(v_w1_bboxMin, vec8i_mullo(vec8i_fromInt(edge1.m_dx), v_blockOffsets));
-	vec8i v_w2_blockY = vec8i_add(v_w2_bboxMin, vec8i_mullo(vec8i_fromInt(edge2.m_dx), v_blockOffsets));
+	vec8i v_w0_blockY = vec8i_add(v_w0_bboxMin, vec8i_mullo(v_edge0_dx, v_blockOffsets));
+	vec8i v_w1_blockY = vec8i_add(v_w1_bboxMin, vec8i_mullo(v_edge1_dx, v_blockOffsets));
+	vec8i v_w2_blockY = vec8i_add(v_w2_bboxMin, vec8i_mullo(v_edge2_dx, v_blockOffsets));
 
 	for (int32_t blockMinY = bboxMinY_aligned; blockMinY < bboxMaxY_aligned; blockMinY += 8) {
 		uint32_t* fb_blockY = &ctx->m_FrameBuffer[blockMinY * ctx->m_Width];
@@ -574,67 +431,31 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			const vec8i v_w2_trivialReject = vec8i_add(v_w2_blockMin, v_trivialRejectOffset_2);
 			const vec8i v_w_trivialReject = vec8i_or3(v_w0_trivialReject, v_w1_trivialReject, v_w2_trivialReject);
 			uint32_t trivialRejectBlockMask = ~vec8i_getSignMask(v_w_trivialReject) & 0xFF;
-			if (trivialRejectBlockMask == 0) {
-				v_w0_blockMin = vec8i_add(v_w0_blockMin, v_w0_nextBlock_dx);
-				v_w1_blockMin = vec8i_add(v_w1_blockMin, v_w1_nextBlock_dx);
-				v_w2_blockMin = vec8i_add(v_w2_blockMin, v_w2_nextBlock_dx);
-				continue;
-			}
+			if (trivialRejectBlockMask != 0) {
+				int32_t w0_blockMin[8], w1_blockMin[8], w2_blockMin[8];
+				vec8i_toInt8va(v_w0_blockMin, &w0_blockMin[0]);
+				vec8i_toInt8va(v_w1_blockMin, &w1_blockMin[0]);
+				vec8i_toInt8va(v_w2_blockMin, &w2_blockMin[0]);
 
-			// Evaluate each edge function at its trivial accept corner (the most negative block corner).
-			// If the trivial accept corner of all edges is positive (inside the edge) then the triangle
-			// fully covers the block.
-			const vec8i v_w0_trivialAccept = vec8i_add(v_w0_blockMin, v_trivialAcceptOffset_0);
-			const vec8i v_w1_trivialAccept = vec8i_add(v_w1_blockMin, v_trivialAcceptOffset_1);
-			const vec8i v_w2_trivialAccept = vec8i_add(v_w2_blockMin, v_trivialAcceptOffset_2);
-			const vec8i v_w_trivialAccept = vec8i_or3(v_w0_trivialAccept, v_w1_trivialAccept, v_w2_trivialAccept);
-			uint32_t trivialAcceptBlockMask = vec8i_getSignMask(v_w_trivialAccept);
-
-			int32_t w0_blockMin[8], w1_blockMin[8], w2_blockMin[8];
-			vec8i_toInt8va(v_w0_blockMin, &w0_blockMin[0]);
-			vec8i_toInt8va(v_w1_blockMin, &w1_blockMin[0]);
-			vec8i_toInt8va(v_w2_blockMin, &w2_blockMin[0]);
-
-#if 1
-			uint32_t iBlock = _tzcnt_u32(trivialRejectBlockMask);
-			trivialRejectBlockMask >>= iBlock;
-			do {
-				tile.blockMin_w[0] = w0_blockMin[iBlock];
-				tile.blockMin_w[1] = w1_blockMin[iBlock];
-				tile.blockMin_w[2] = w2_blockMin[iBlock];
-				swr_drawTile8x8_partial_aligned(tile, va_r, va_g, va_b, va_a, &fb_blockY[blockMinX + iBlock * 8], ctx->m_Width);
-				trivialRejectBlockMask >>= 1;
-				++iBlock;
-			} while (trivialRejectBlockMask != 0);
-#else
-			for (uint32_t iBlock = 0; trivialRejectBlockMask != 0;
-				++iBlock, trivialRejectBlockMask >>= 1, trivialAcceptBlockMask >>= 1) {
-				if ((trivialRejectBlockMask & 1) == 0) {
-					continue;
-				}
-
-				tile.blockMin_w[0] = w0_blockMin[iBlock];
-				tile.blockMin_w[1] = w1_blockMin[iBlock];
-				tile.blockMin_w[2] = w2_blockMin[iBlock];
-#if SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
-				swr_drawTile8x8_partial_aligned(tile, va_r, va_g, va_b, va_a, &fb_blockY[blockMinX + iBlock * 8], ctx->m_Width);
-#else
-				if ((trivialAcceptBlockMask & 1) != 0) {
+				uint32_t iBlock = _tzcnt_u32(trivialRejectBlockMask);
+				trivialRejectBlockMask >>= iBlock;
+				do {
+					tile.blockMin_w[0] = w0_blockMin[iBlock];
+					tile.blockMin_w[1] = w1_blockMin[iBlock];
+					tile.blockMin_w[2] = w2_blockMin[iBlock];
 					swr_drawTile8x8_partial_aligned(tile, va_r, va_g, va_b, va_a, &fb_blockY[blockMinX + iBlock * 8], ctx->m_Width);
-				} else {
-					swr_drawTile8x8_full(tile, va_r, va_g, va_b, va_a, &fb_blockY[blockMinX + iBlock * 8], ctx->m_Width);
-				}
-#endif
+					trivialRejectBlockMask >>= 1;
+					++iBlock;
+				} while (trivialRejectBlockMask != 0);
 			}
-#endif
 
-			v_w0_blockMin = vec8i_add(v_w0_blockMin, v_w0_nextBlock_dx);
-			v_w1_blockMin = vec8i_add(v_w1_blockMin, v_w1_nextBlock_dx);
-			v_w2_blockMin = vec8i_add(v_w2_blockMin, v_w2_nextBlock_dx);
+			v_w0_blockMin = vec8i_add(v_w0_blockMin, vec8i_sal(v_edge0_dx, 6));
+			v_w1_blockMin = vec8i_add(v_w1_blockMin, vec8i_sal(v_edge1_dx, 6));
+			v_w2_blockMin = vec8i_add(v_w2_blockMin, vec8i_sal(v_edge2_dx, 6));
 		}
 
-		v_w0_blockY = vec8i_add(v_w0_blockY, v_w0_nextBlock_dy);
-		v_w1_blockY = vec8i_add(v_w1_blockY, v_w1_nextBlock_dy);
-		v_w2_blockY = vec8i_add(v_w2_blockY, v_w2_nextBlock_dy);
+		v_w0_blockY = vec8i_add(v_w0_blockY, vec8i_sal(v_edge0_dy, 3));
+		v_w1_blockY = vec8i_add(v_w1_blockY, vec8i_sal(v_edge1_dy, 3));
+		v_w2_blockY = vec8i_add(v_w2_blockY, vec8i_sal(v_edge2_dy, 3));
 	}
 }
