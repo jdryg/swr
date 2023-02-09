@@ -68,202 +68,35 @@ typedef struct swr_tile
 
 static __forceinline void swr_drawTile8x8_partial_aligned(swr_tile tile, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t* tileFB, uint32_t rowStride)
 {
-	const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[0]), tile.v_edge_dx[0]);
-	const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[1]), tile.v_edge_dx[1]);
-	const vec8i v_w2_row0 = vec8i_add(vec8i_fromInt(tile.blockMin_w[2]), tile.v_edge_dx[2]);
+	vec8i v_w0_row = vec8i_add(vec8i_fromInt(tile.blockMin_w[0]), tile.v_edge_dx[0]);
+	vec8i v_w1_row = vec8i_add(vec8i_fromInt(tile.blockMin_w[1]), tile.v_edge_dx[1]);
+	vec8i v_w2_row = vec8i_add(vec8i_fromInt(tile.blockMin_w[2]), tile.v_edge_dx[2]);
 
-	const vec8i v_w0_row1 = vec8i_add(v_w0_row0, tile.v_edge_dy[0]);
-	const vec8i v_w1_row1 = vec8i_add(v_w1_row0, tile.v_edge_dy[1]);
-	const vec8i v_w2_row1 = vec8i_add(v_w2_row0, tile.v_edge_dy[2]);
-	const vec8i v_w0_row2 = vec8i_add(v_w0_row1, tile.v_edge_dy[0]);
-	const vec8i v_w1_row2 = vec8i_add(v_w1_row1, tile.v_edge_dy[1]);
-	const vec8i v_w2_row2 = vec8i_add(v_w2_row1, tile.v_edge_dy[2]);
-	const vec8i v_w0_row3 = vec8i_add(v_w0_row2, tile.v_edge_dy[0]);
-	const vec8i v_w1_row3 = vec8i_add(v_w1_row2, tile.v_edge_dy[1]);
-	const vec8i v_w2_row3 = vec8i_add(v_w2_row2, tile.v_edge_dy[2]);
-	const vec8i v_w0_row4 = vec8i_add(v_w0_row3, tile.v_edge_dy[0]);
-	const vec8i v_w1_row4 = vec8i_add(v_w1_row3, tile.v_edge_dy[1]);
-	const vec8i v_w2_row4 = vec8i_add(v_w2_row3, tile.v_edge_dy[2]);
-	const vec8i v_w0_row5 = vec8i_add(v_w0_row4, tile.v_edge_dy[0]);
-	const vec8i v_w1_row5 = vec8i_add(v_w1_row4, tile.v_edge_dy[1]);
-	const vec8i v_w2_row5 = vec8i_add(v_w2_row4, tile.v_edge_dy[2]);
-	const vec8i v_w0_row6 = vec8i_add(v_w0_row5, tile.v_edge_dy[0]);
-	const vec8i v_w1_row6 = vec8i_add(v_w1_row5, tile.v_edge_dy[1]);
-	const vec8i v_w2_row6 = vec8i_add(v_w2_row5, tile.v_edge_dy[2]);
-	const vec8i v_w0_row7 = vec8i_add(v_w0_row6, tile.v_edge_dy[0]);
-	const vec8i v_w1_row7 = vec8i_add(v_w1_row6, tile.v_edge_dy[1]);
-	const vec8i v_w2_row7 = vec8i_add(v_w2_row6, tile.v_edge_dy[2]);
+	for (uint32_t i = 0; i < 8; ++i) {
+		const vec8i v_w_row_or = vec8i_or3(v_w0_row, v_w1_row, v_w2_row);
 
-	// Calculate the (inverse) pixel mask.
-	// If any of the barycentric coordinates is negative, the pixel mask will 
-	// be equal to 0xFFFFFFFF for that pixel. This mask is used to replace
-	// the existing framebuffer values and the new values.
-	const vec8i v_w_row0_or = vec8i_or3(v_w0_row0, v_w1_row0, v_w2_row0);
-	const vec8i v_w_row1_or = vec8i_or3(v_w0_row1, v_w1_row1, v_w2_row1);
-	const vec8i v_w_row2_or = vec8i_or3(v_w0_row2, v_w1_row2, v_w2_row2);
-	const vec8i v_w_row3_or = vec8i_or3(v_w0_row3, v_w1_row3, v_w2_row3);
-	const vec8i v_w_row4_or = vec8i_or3(v_w0_row4, v_w1_row4, v_w2_row4);
-	const vec8i v_w_row5_or = vec8i_or3(v_w0_row5, v_w1_row5, v_w2_row5);
-	const vec8i v_w_row6_or = vec8i_or3(v_w0_row6, v_w1_row6, v_w2_row6);
-	const vec8i v_w_row7_or = vec8i_or3(v_w0_row7, v_w1_row7, v_w2_row7);
-
+		// Row 0
+		if (!vec8i_allNegative(v_w_row_or)) {
+			const vec8i v_notPixelMask = vec8i_sar(v_w_row_or, 31);
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
-	const vec8i v_rgba8 = vec8i_fromInt(-1);
+			const vec8i v_rgba8 = vec8i_fromInt(-1);
+#else
+			const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row), tile.v_inv_area);
+			const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row), tile.v_inv_area);
+			const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
+			const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
+			const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
+			const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
+			const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
+#endif
+			vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[0]);
+		}
 
-	// Row 0
-	if (!vec8i_allNegative(v_w_row0_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row0_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[0]);
+		v_w0_row = vec8i_add(v_w0_row, tile.v_edge_dy[0]);
+		v_w1_row = vec8i_add(v_w1_row, tile.v_edge_dy[1]);
+		v_w2_row = vec8i_add(v_w2_row, tile.v_edge_dy[2]);
+		tileFB += rowStride;
 	}
-
-	// Row 1
-	if (!vec8i_allNegative(v_w_row1_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row1_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride]);
-	}
-
-	// Row 2
-	if (!vec8i_allNegative(v_w_row2_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row2_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 2]);
-	}
-
-	// Row 3
-	if (!vec8i_allNegative(v_w_row3_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row3_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 3]);
-	}
-
-	// Row 4
-	if (!vec8i_allNegative(v_w_row4_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row4_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 4]);
-	}
-
-	// Row 5
-	if (!vec8i_allNegative(v_w_row5_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row5_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 5]);
-	}
-
-	// Row 6
-	if (!vec8i_allNegative(v_w_row6_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row6_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 6]);
-	}
-
-	// Row 7
-	if (!vec8i_allNegative(v_w_row7_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row7_or, 31);
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 7]);
-	}
-#else // SWR_CONFIG_DISABLE_PIXEL_SHADERS
-	const vec8f v_inv_area = tile.v_inv_area;
-
-	// Row 0
-	if (!vec8i_allNegative(v_w_row0_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row0_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row0), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row0), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[0]);
-	}
-
-	// Row 1
-	if (!vec8i_allNegative(v_w_row1_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row1_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row1), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row1), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride]);
-	}
-
-	// Row 2
-	if (!vec8i_allNegative(v_w_row2_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row2_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row2), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row2), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 2]);
-	}
-
-	// Row 3
-	if (!vec8i_allNegative(v_w_row3_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row3_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row3), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row3), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 3]);
-	}
-
-	// Row 4
-	if (!vec8i_allNegative(v_w_row4_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row4_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row4), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row4), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 4]);
-	}
-
-	// Row 5
-	if (!vec8i_allNegative(v_w_row5_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row5_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row5), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row5), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 5]);
-	}
-
-	// Row 6
-	if (!vec8i_allNegative(v_w_row6_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row6_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row6), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row6), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 6]);
-	}
-
-	// Row 7
-	if (!vec8i_allNegative(v_w_row7_or)) {
-		const vec8i v_notPixelMask = vec8i_sar(v_w_row7_or, 31);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row7), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row7), v_inv_area);
-		const vec8f v_cr = swr_vertexAttribEval(va_r, v_l0, v_l1);
-		const vec8f v_cg = swr_vertexAttribEval(va_g, v_l0, v_l1);
-		const vec8f v_cb = swr_vertexAttribEval(va_b, v_l0, v_l1);
-		const vec8f v_ca = swr_vertexAttribEval(va_a, v_l0, v_l1);
-		const vec8i v_rgba8 = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_maskedInv(v_rgba8, v_notPixelMask, &tileFB[rowStride * 7]);
-	}
-#endif // SWR_CONFIG_DISABLE_PIXEL_SHADERS
 }
 
 static __forceinline void swr_drawTile8x8_partial_unaligned(swr_tile tile, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t* tileFB, uint32_t rowStride)
@@ -466,6 +299,7 @@ static __forceinline void swr_drawTile8x8_partial_unaligned(swr_tile tile, swr_v
 #endif // SWR_CONFIG_DISABLE_PIXEL_SHADERS
 }
 
+#if !SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
 static __forceinline void swr_drawTile8x8_full(swr_tile tile, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t* tileFB, uint32_t rowStride)
 {
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
@@ -597,6 +431,7 @@ static __forceinline void swr_drawTile8x8_full(swr_tile tile, swr_vertex_attrib_
 	}
 #endif // SWR_CONFIG_DISABLE_PIXEL_SHADERS
 }
+#endif // SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
 
 void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
 {
