@@ -595,6 +595,18 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			vec8i_toInt8va(v_w1_blockMin, &w1_blockMin[0]);
 			vec8i_toInt8va(v_w2_blockMin, &w2_blockMin[0]);
 
+#if 1
+			uint32_t iBlock = _tzcnt_u32(trivialRejectBlockMask);
+			trivialRejectBlockMask >>= iBlock;
+			do {
+				tile.blockMin_w[0] = w0_blockMin[iBlock];
+				tile.blockMin_w[1] = w1_blockMin[iBlock];
+				tile.blockMin_w[2] = w2_blockMin[iBlock];
+				swr_drawTile8x8_partial_aligned(tile, va_r, va_g, va_b, va_a, &fb_blockY[blockMinX + iBlock * 8], ctx->m_Width);
+				trivialRejectBlockMask >>= 1;
+				++iBlock;
+			} while (trivialRejectBlockMask != 0);
+#else
 			for (uint32_t iBlock = 0; trivialRejectBlockMask != 0;
 				++iBlock, trivialRejectBlockMask >>= 1, trivialAcceptBlockMask >>= 1) {
 				if ((trivialRejectBlockMask & 1) == 0) {
@@ -614,6 +626,7 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 				}
 #endif
 			}
+#endif
 
 			v_w0_blockMin = vec8i_add(v_w0_blockMin, v_w0_nextBlock_dx);
 			v_w1_blockMin = vec8i_add(v_w1_blockMin, v_w1_nextBlock_dx);

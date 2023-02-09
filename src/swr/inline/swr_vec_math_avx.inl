@@ -152,6 +152,7 @@ static __forceinline void vec4i_toInt4va(vec4i x, int32_t* arr)
 
 static __forceinline void vec4i_toInt4va_masked(vec4i x, vec4i mask, int32_t* buffer)
 {
+	// TODO: _mm_maskstore_epi32?
 	const __m128i old = _mm_load_si128((const __m128i*)buffer);
 	const __m128i oldMasked = _mm_andnot_si128(mask.m_IMM, old);
 	const __m128i newMasked = _mm_and_si128(mask.m_IMM, x.m_IMM);
@@ -161,6 +162,7 @@ static __forceinline void vec4i_toInt4va_masked(vec4i x, vec4i mask, int32_t* bu
 
 static __forceinline void vec4i_toInt4va_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer)
 {
+	// TODO: _mm_maskstore_epi32?
 	const __m128i old = _mm_load_si128((const __m128i*)buffer);
 	const __m128i oldMasked = _mm_and_si128(maskInv.m_IMM, old);
 	const __m128i newMasked = _mm_andnot_si128(maskInv.m_IMM, x.m_IMM);
@@ -170,6 +172,7 @@ static __forceinline void vec4i_toInt4va_maskedInv(vec4i x, vec4i maskInv, int32
 
 static __forceinline void vec4i_toInt4vu_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer)
 {
+	// TODO: _mm_maskstore_epi32?
 	const __m128i old = _mm_lddqu_si128((const __m128i*)buffer);
 	const __m128i oldMasked = _mm_and_si128(maskInv.m_IMM, old);
 	const __m128i newMasked = _mm_andnot_si128(maskInv.m_IMM, x.m_IMM);
@@ -402,29 +405,53 @@ static __forceinline void vec8i_toInt8va(vec8i x, int32_t* arr)
 
 static __forceinline void vec8i_toInt8va_masked(vec8i x, vec8i mask, int32_t* buffer)
 {
+#if 1
+	_mm256_maskstore_epi32(buffer, mask.m_YMM, x.m_YMM);
+#else
 	const __m256i old = _mm256_load_si256((const __m256i*)buffer);
+#if 1
+	const __m256i final = _mm256_blendv_epi8(old, x.m_YMM, mask.m_YMM);
+#else
 	const __m256i oldMasked = _mm256_andnot_si256(mask.m_YMM, old);
 	const __m256i newMasked = _mm256_and_si256(mask.m_YMM, x.m_YMM);
 	const __m256i final = _mm256_or_si256(oldMasked, newMasked);
+#endif
 	_mm256_store_si256((__m256i*)buffer, final);
+#endif
 }
 
 static __forceinline void vec8i_toInt8va_maskedInv(vec8i x, vec8i maskInv, int32_t* buffer)
 {
+#if 1
+	_mm256_maskstore_epi32(buffer, _mm256_xor_si256(maskInv.m_YMM, _mm256_set1_epi32(-1)), x.m_YMM);
+#else
 	const __m256i old = _mm256_load_si256((const __m256i*)buffer);
+#if 1
+	const __m256i final = _mm256_blendv_epi8(x.m_YMM, old, maskInv.m_YMM);
+#else
 	const __m256i oldMasked = _mm256_and_si256(maskInv.m_YMM, old);
 	const __m256i newMasked = _mm256_andnot_si256(maskInv.m_YMM, x.m_YMM);
 	const __m256i final = _mm256_or_si256(oldMasked, newMasked);
+#endif
 	_mm256_store_si256((__m256i*)buffer, final);
+#endif
 }
 
 static __forceinline void vec8i_toInt8vu_maskedInv(vec8i x, vec8i maskInv, int32_t* buffer)
 {
-	const __m256i old = _mm256_loadu_si256((const __m256i*)buffer);
+#if 1
+	_mm256_maskstore_epi32(buffer, _mm256_xor_si256(maskInv.m_YMM, _mm256_set1_epi32(-1)), x.m_YMM);
+#else
+	const __m256i old = _mm256_lddqu_si256((const __m256i*)buffer);
+#if 0
+	const __m256i final = _mm256_blendv_epi8(x.m_YMM, old, maskInv.m_YMM);
+#else
 	const __m256i oldMasked = _mm256_and_si256(maskInv.m_YMM, old);
 	const __m256i newMasked = _mm256_andnot_si256(maskInv.m_YMM, x.m_YMM);
 	const __m256i final = _mm256_or_si256(oldMasked, newMasked);
+#endif
 	_mm256_storeu_si256((__m256i*)buffer, final);
+#endif
 }
 
 static __forceinline vec8i vec8i_add(vec8i a, vec8i b)
