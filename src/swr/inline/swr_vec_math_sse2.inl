@@ -172,16 +172,26 @@ static inline void vec4i_toInt4va_masked(vec4i x, vec4i mask, int32_t* buffer)
 static inline void vec4i_toInt4va_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer)
 {
 #if 0
-	static const uint32_t ones[] = { UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX };
-	const __m128i imm_ones = _mm_load_si128((const __m128i*)ones);
-	const __m128i imm_mask = _mm_xor_si128(maskInv.m_IMM, imm_ones);
-	_mm_maskmoveu_si128(x.m_IMM, imm_mask, (char*)buffer);
+	_mm_maskmoveu_si128(x.m_IMM, _mm_xor_si128(maskInv.m_IMM, _mm_set1_epi32(-1)), (char*)buffer);
 #else
 	const __m128i old = _mm_load_si128((const __m128i*)buffer);
 	const __m128i oldMasked = _mm_and_si128(maskInv.m_IMM, old);
 	const __m128i newMasked = _mm_andnot_si128(maskInv.m_IMM, x.m_IMM);
 	const __m128i final = _mm_or_si128(oldMasked, newMasked);
 	_mm_store_si128((__m128i*)buffer, final);
+#endif
+}
+
+static void vec4i_toInt4vu_maskedInv(vec4i x, vec4i maskInv, int32_t* buffer)
+{
+#if 0
+	_mm_maskmoveu_si128(x.m_IMM, _mm_xor_si128(maskInv.m_IMM, _mm_set1_epi32(-1)), (char*)buffer);
+#else
+	const __m128i old = _mm_loadu_si128((const __m128i*)buffer);
+	const __m128i oldMasked = _mm_and_si128(maskInv.m_IMM, old);
+	const __m128i newMasked = _mm_andnot_si128(maskInv.m_IMM, x.m_IMM);
+	const __m128i final = _mm_or_si128(oldMasked, newMasked);
+	_mm_storeu_si128((__m128i*)buffer, final);
 #endif
 }
 

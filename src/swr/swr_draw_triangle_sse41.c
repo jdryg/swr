@@ -7,7 +7,7 @@
 #include "swr_vec_math.h"
 
 #define SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL  1
-#define SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION 0
+#define SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION 1
 
 typedef struct swr_edge
 {
@@ -420,7 +420,7 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 #if SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
 	// BUG: There is something wrong with this code path. Visual comparison with reference
 	// implementation does not give correct results.
-	if (bboxWidth <= 4 && bboxHeight <= 4) {
+	if (bboxWidth < 4 && bboxHeight < 4) {
 		const int32_t tileX = (bboxMinX + 4 >= (int32_t)ctx->m_Width)
 			? ctx->m_Width - 4
 			: bboxMinX
@@ -438,6 +438,7 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	}
 #endif
 
+	// 4x1 4x4 block scan
 	int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
 	int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX + 1, 16);
 	if (bboxMaxX_aligned >= (int32_t)ctx->m_Width) {
