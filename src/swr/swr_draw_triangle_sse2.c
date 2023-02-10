@@ -51,12 +51,21 @@ void swrDrawTriangleSSE2(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, i
 	const int32_t bboxMinY = core_maxi32(core_min3i32(y0, y1, y2), 0);
 	const int32_t bboxMaxX = core_mini32(core_max3i32(x0, x1, x2), (int32_t)(ctx->m_Width - 1));
 	const int32_t bboxMaxY = core_mini32(core_max3i32(y0, y1, y2), (int32_t)(ctx->m_Height - 1));
-	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
-	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
-	const int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX, 16);
-	const int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY, 4);
-	const int32_t bboxWidth = bboxMaxX_aligned - bboxMinX_aligned;
-	const int32_t bboxHeight = bboxMaxY_aligned - bboxMinY_aligned;
+	int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
+	int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX + 1, 16);
+	if (bboxMaxX_aligned >= (int32_t)ctx->m_Width) {
+		const uint32_t n = (bboxMaxX_aligned - bboxMinX_aligned) / 16;
+		bboxMaxX_aligned = ctx->m_Width;
+		bboxMinX_aligned = ctx->m_Width - n * 16;
+	}
+
+	int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
+	int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY + 1, 4);
+	if (bboxMaxY_aligned >= (int32_t)ctx->m_Height) {
+		const uint32_t n = (bboxMaxY_aligned - bboxMinY_aligned) / 4;
+		bboxMaxY_aligned = ctx->m_Height;
+		bboxMinY_aligned = ctx->m_Height - n * 4;
+	}
 
 	// Prepare interpolated attributes
 #if !SWR_CONFIG_DISABLE_PIXEL_SHADERS

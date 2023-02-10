@@ -7,7 +7,7 @@
 #include "swr_vec_math.h"
 
 #define SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL  1
-#define SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION 1
+#define SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION 0
 
 typedef struct swr_edge
 {
@@ -418,6 +418,8 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	};
 
 #if SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
+	// BUG: There is something wrong with this code path. Visual comparison with reference
+	// implementation does not give correct results.
 	if (bboxWidth <= 4 && bboxHeight <= 4) {
 		const int32_t tileX = (bboxMinX + 4 >= (int32_t)ctx->m_Width)
 			? ctx->m_Width - 4
@@ -436,10 +438,21 @@ void swrDrawTriangleSSE41(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, 
 	}
 #endif
 
-	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
-	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
-	const int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX, 16);
-	const int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY, 4);
+	int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 16);
+	int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX + 1, 16);
+	if (bboxMaxX_aligned >= (int32_t)ctx->m_Width) {
+		const uint32_t n = (bboxMaxX_aligned - bboxMinX_aligned) / 16;
+		bboxMaxX_aligned = ctx->m_Width;
+		bboxMinX_aligned = ctx->m_Width - n * 16;
+	}
+
+	int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
+	int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY + 1, 4);
+	if (bboxMaxY_aligned >= (int32_t)ctx->m_Height) {
+		const uint32_t n = (bboxMaxY_aligned - bboxMinY_aligned) / 4;
+		bboxMaxY_aligned = ctx->m_Height;
+		bboxMinY_aligned = ctx->m_Height - n * 4;
+	}
 
 	// Trivial reject/accept corner offsets relative to block min/max.
 	const vec4i v_blockSize_m1 = vec4i_fromInt(4 - 1);

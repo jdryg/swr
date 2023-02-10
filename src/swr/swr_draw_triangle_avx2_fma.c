@@ -364,6 +364,9 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 		.v_inv_area = v_inv_area
 	};
 
+#if 0
+	// BUG: There is something wrong with this code path. Visual comparison with reference
+	// implementation does not give correct results.
 	if (bboxWidth <= 8 && bboxHeight <= 8) {
 		const int32_t tileX = (bboxMinX + 8 >= (int32_t)ctx->m_Width)
 			? ctx->m_Width - 8
@@ -380,12 +383,31 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 		swr_drawTile8x8_partial_unaligned(tile, va_r, va_g, va_b, va_a, &ctx->m_FrameBuffer[tileX + tileY * ctx->m_Width], ctx->m_Width);
 		return;
 	}
+#endif
 
 	// 8x1 8x8 block scan
-	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 64);
-	const int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX, 64);
+#if 1
+	int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 64);
+	int32_t bboxMaxX_aligned = core_roundUp(bboxMaxX + 1, 64);
+	if (bboxMaxX_aligned >= (int32_t)ctx->m_Width) {
+		const uint32_t n = (bboxMaxX_aligned - bboxMinX_aligned) / 64;
+		bboxMaxX_aligned = ctx->m_Width;
+		bboxMinX_aligned = ctx->m_Width - n * 64;
+	}
+
+	int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 8);
+	int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY + 1, 8);
+	if (bboxMaxY_aligned >= (int32_t)ctx->m_Height) {
+		const uint32_t n = (bboxMaxY_aligned - bboxMinY_aligned) / 8;
+		bboxMaxY_aligned = ctx->m_Height;
+		bboxMinY_aligned = ctx->m_Height - n * 8;
+	}
+#else
+	const int32_t bboxMinX_aligned = core_roundDown(bboxMinX, 8);
+	const int32_t bboxMaxX_aligned = core_mini32(core_roundUp(bboxMaxX, 64), ctx->m_Width - 1);
 	const int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 8);
-	const int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY, 8);
+	const int32_t bboxMaxY_aligned = core_mini32(core_roundUp(bboxMaxY, 8), ctx->m_Height - 1);
+#endif
 
 	// Trivial reject/accept corner offsets relative to block min/max.
 	const vec4i v_blockSize_m1 = vec4i_fromInt(8 - 1);

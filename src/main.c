@@ -40,7 +40,11 @@ typedef struct drawcall_t
 	uint16_t m_MaxIndex;
 } drawcall_t;
 
+#ifdef _DEBUG
+#define MOVING_AVG_NUM_SAMPLES 4
+#else
 #define MOVING_AVG_NUM_SAMPLES 512
+#endif
 
 typedef struct stats_t
 {
