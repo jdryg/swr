@@ -163,7 +163,10 @@
     <ClCompile Include="src\swr\swr_draw_triangle_sse2.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_sse41.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_ssse3.c" />
-    <ClCompile Include="src\swr\swr_transform_pos_avx_fma.c" />
+    <ClCompile Include="src\swr\swr_transform_pos_avx_fma.c">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="src\swr\swr_transform_pos_ref.c" />
     <ClCompile Include="src\swr\swr_transform_pos_sse2.c" />
   </ItemGroup>
