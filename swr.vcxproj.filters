@@ -96,6 +96,12 @@
     <ClCompile Include="src\swr\swr_draw_triangle_avx2_fma.c">
       <Filter>src\swr</Filter>
     </ClCompile>
+    <ClCompile Include="src\swr\swr_transform_pos_ref.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\swr\swr_transform_pos_sse2.c">
+      <Filter>src\swr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h">

@@ -21,6 +21,9 @@ typedef enum vec4_shuffle_mask
 	VEC4_SHUFFLE_XZXZ = VEC4_SHUFFLE_MASK(0, 2, 0, 2),
 	VEC4_SHUFFLE_YWYW = VEC4_SHUFFLE_MASK(1, 3, 1, 3),
 	VEC4_SHUFFLE_ZWZW = VEC4_SHUFFLE_MASK(2, 3, 2, 3),
+	VEC4_SHUFFLE_XZYW = VEC4_SHUFFLE_MASK(0, 2, 1, 3),
+	VEC4_SHUFFLE_XXZZ = VEC4_SHUFFLE_MASK(0, 0, 2, 2),
+	VEC4_SHUFFLE_YYWW = VEC4_SHUFFLE_MASK(1, 1, 3, 3),
 } vec4_shuffle_mask;
 
 typedef struct vec4f
@@ -59,6 +62,8 @@ static vec4f vec4f_zero(void);
 static vec4f vec4f_fromFloat(float x);
 static vec4f vec4f_fromVec4i(vec4i x);
 static vec4f vec4f_fromFloat4(float x0, float x1, float x2, float x3);
+static vec4f vec4f_fromFloat4va(const float* arr);
+static vec4f vec4f_fromFloat4vu(const float* arr);
 static vec4f vec4f_fromRGBA8(uint32_t rgba8);
 static uint32_t vec4f_toRGBA8(vec4f x);
 static vec4f vec4f_add(vec4f a, vec4f b);

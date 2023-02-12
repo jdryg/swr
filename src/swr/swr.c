@@ -22,7 +22,7 @@ static void swrDrawLine(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, in
 static void swrDrawTriangleDispatch(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2);
 static void swrDrawText(swr_context* ctx, const swr_font* font, int32_t x0, int32_t y0, const char* str, const char* end, uint32_t color);
 
-static void swrTransformPos2fTo2i(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
+static void swrTransformPos2fTo2iDispatch(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
 
 swr_api* swr = &(swr_api){
 	.createContext = swrCreateContext,
@@ -40,7 +40,7 @@ swr_api* swr = &(swr_api){
 	.drawTriangle = swrDrawTriangleDispatch,
 	.drawText = swrDrawText,
 
-	.transformPos2fTo2i = swrTransformPos2fTo2i
+	.transformPos2fTo2i = swrTransformPos2fTo2iDispatch
 };
 
 static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, uint32_t h)
@@ -347,18 +347,21 @@ static void swrDrawTriangleDispatch(swr_context* ctx, int32_t x0, int32_t y0, in
 	swr->drawTriangle(ctx, x0, y0, x1, y1, x2, y2, color0, color1, color2);
 }
 
-static void swrTransformPos2fTo2i(uint32_t n, const float* posf, int32_t* posi, const float* mtx)
+extern void swrTransformPos2fTo2iRef(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
+extern void swrTransformPos2fTo2iSSE2(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
+
+static void swrTransformPos2fTo2iDispatch(uint32_t n, const float* posf, int32_t* posi, const float* mtx)
 {
-	const float* src = posf;
-	int32_t* dst = posi;
-	for (uint32_t i = 0; i < n; ++i) {
-		const float px = src[0];
-		const float py = src[1];
-
-		dst[0] = (int32_t)(mtx[0] * px + mtx[2] * py + mtx[4]);
-		dst[1] = (int32_t)(mtx[1] * px + mtx[3] * py + mtx[5]);
-
-		src += 2;
-		dst += 2;
+#if 1
+	const uint64_t cpuFeatures = core_cpuGetFeatures();
+	if ((cpuFeatures & CORE_CPU_FEATURE_SSE2) != 0) {
+		swr->transformPos2fTo2i = swrTransformPos2fTo2iSSE2;
+	} else {
+		swr->transformPos2fTo2i = swrTransformPos2fTo2iRef;
 	}
+#else
+	swr->transformPos2fTo2i = swrTransformPos2fTo2iRef;
+#endif
+
+	swr->transformPos2fTo2i(n, posf, posi, mtx);
 }

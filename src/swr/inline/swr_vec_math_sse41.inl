@@ -24,6 +24,16 @@ static __forceinline vec4f vec4f_fromFloat4(float x0, float x1, float x2, float 
 	return VEC4F(_mm_set_ps(x3, x2, x1, x0));
 }
 
+static __forceinline vec4f vec4f_fromFloat4va(const float* arr)
+{
+	return VEC4F(_mm_load_ps(arr));
+}
+
+static __forceinline vec4f vec4f_fromFloat4vu(const float* arr)
+{
+	return VEC4F(_mm_loadu_ps(arr));
+}
+
 static __forceinline vec4f vec4f_fromRGBA8(uint32_t rgba8)
 {
 	const __m128i imm_zero = _mm_setzero_si128();

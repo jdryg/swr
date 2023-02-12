@@ -163,6 +163,8 @@
     <ClCompile Include="src\swr\swr_draw_triangle_sse2.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_sse41.c" />
     <ClCompile Include="src\swr\swr_draw_triangle_ssse3.c" />
+    <ClCompile Include="src\swr\swr_transform_pos_ref.c" />
+    <ClCompile Include="src\swr\swr_transform_pos_sse2.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\minifb\include\MiniFB.h" />
