@@ -1,62 +1,44 @@
-SSE4.1: SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL + SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
-zoom: 680.0, avg: 4.84, stddev: 0.0895
-zoom: 1000.0, avg: 5.67, stddev: 0.0753
-zoom: 2000.0, avg: 4.49, stddev: 0.0564
-zoom: 4000.0, avg: 2.71, stddev: 0.0372
-zoom: 8000.0, avg: 2.02, stddev: 0.0226
-zoom: 16000.0, avg: 1.77, stddev: 0.0250
-zoom: 32000.0, avg: 1.57, stddev: 0.0204
-
-SSE4.1: SWR_CONFIG_SMALL_TRIANGLE_OPTIMIZATION
-zoom: 680.0, avg: 5.17, stddev: 0.0842
-zoom: 1000.0, avg: 6.16, stddev: 0.0917
-zoom: 2000.0, avg: 4.91, stddev: 0.0599
-zoom: 4000.0, avg: 2.97, stddev: 0.0572
-zoom: 8000.0, avg: 2.09, stddev: 0.0584
-zoom: 16000.0, avg: 1.82, stddev: 0.0327
-zoom: 32000.0, avg: 1.54, stddev: 0.0200
-
-SSE4.1: SWR_CONFIG_TREAT_ALL_TILES_AS_PARTIAL
-zoom: 680.0, avg: 5.77, stddev: 0.1129
-zoom: 1000.0, avg: 6.21, stddev: 0.1346
-zoom: 2000.0, avg: 4.49, stddev: 0.1006
-zoom: 4000.0, avg: 2.71, stddev: 0.0579
-zoom: 8000.0, avg: 2.00, stddev: 0.0405
-zoom: 16000.0, avg: 1.76, stddev: 0.0474
-zoom: 32000.0, avg: 1.55, stddev: 0.0223
-
-SSE4.1: No flag set
-zoom: 680.0, avg: 5.92, stddev: 0.1099
-zoom: 1000.0, avg: 6.34, stddev: 0.1030
-zoom: 2000.0, avg: 4.56, stddev: 0.0757
-zoom: 4000.0, avg: 2.75, stddev: 0.0463
-zoom: 8000.0, avg: 1.95, stddev: 0.0761
-zoom: 16000.0, avg: 1.64, stddev: 0.0407
-zoom: 32000.0, avg: 1.44, stddev: 0.0157
-
 Ref
-zoom: 680.0, avg: 6.67, stddev: 0.1016
-zoom: 1000.0, avg: 8.03, stddev: 0.1243
-zoom: 2000.0, avg: 7.01, stddev: 0.0740
-zoom: 4000.0, avg: 5.22, stddev: 0.2464
-zoom: 8000.0, avg: 4.46, stddev: 0.0357
-zoom: 16000.0, avg: 4.97, stddev: 0.0420
-zoom: 32000.0, avg: 4.90, stddev: 0.0426
+zoom: 680.0, avg: 7.40, stddev: 0.1049
+zoom: 1000.0, avg: 9.43, stddev: 0.1035
+zoom: 2000.0, avg: 9.15, stddev: 0.0897
+zoom: 4000.0, avg: 7.25, stddev: 0.0818
+zoom: 8000.0, avg: 5.90, stddev: 0.2009
+zoom: 16000.0, avg: 5.91, stddev: 0.0673
+zoom: 32000.0, avg: 5.45, stddev: 0.0942
 
-Ref: SWR_CONFIG_DISABLE_PIXEL_SHADERS
-zoom: 680.0, avg: 4.29, stddev: 0.0960
-zoom: 1000.0, avg: 4.84, stddev: 0.0924
-zoom: 2000.0, avg: 3.68, stddev: 0.1036
-zoom: 4000.0, avg: 1.93, stddev: 0.0351
-zoom: 8000.0, avg: 1.20, stddev: 0.0261
-zoom: 16000.0, avg: 0.91, stddev: 0.0250
-zoom: 32000.0, avg: 0.74, stddev: 0.0193
+SSE2
+zoom: 680.0, avg: 6.39, stddev: 0.0786
+zoom: 1000.0, avg: 7.72, stddev: 0.1240
+zoom: 2000.0, avg: 5.75, stddev: 0.0639
+zoom: 4000.0, avg: 3.37, stddev: 0.0502
+zoom: 8000.0, avg: 2.40, stddev: 0.0965
+zoom: 16000.0, avg: 2.07, stddev: 0.0273
+zoom: 32000.0, avg: 1.82, stddev: 0.0625
 
-SSE4.1: Old implementation
-zoom: 680.0, avg: 5.01, stddev: 0.1211
-zoom: 1000.0, avg: 5.51, stddev: 0.0932
-zoom: 2000.0, avg: 4.27, stddev: 0.0986
-zoom: 4000.0, avg: 2.55, stddev: 0.0581
-zoom: 8000.0, avg: 1.79, stddev: 0.0207
-zoom: 16000.0, avg: 1.51, stddev: 0.0214
-zoom: 32000.0, avg: 1.27, stddev: 0.0199
+SSSE3
+zoom: 680.0, avg: 6.29, stddev: 0.0902
+zoom: 1000.0, avg: 7.60, stddev: 0.0895
+zoom: 2000.0, avg: 5.69, stddev: 0.1034
+zoom: 4000.0, avg: 3.29, stddev: 0.0421
+zoom: 8000.0, avg: 2.26, stddev: 0.0418
+zoom: 16000.0, avg: 1.93, stddev: 0.0458
+zoom: 32000.0, avg: 1.66, stddev: 0.0385
+
+SSE4.1
+zoom: 680.0, avg: 5.59, stddev: 0.0912
+zoom: 1000.0, avg: 6.64, stddev: 0.0881
+zoom: 2000.0, avg: 4.89, stddev: 0.0593
+zoom: 4000.0, avg: 2.86, stddev: 0.0488
+zoom: 8000.0, avg: 2.03, stddev: 0.0589
+zoom: 16000.0, avg: 1.73, stddev: 0.0267
+zoom: 32000.0, avg: 1.57, stddev: 0.0288
+
+AVX2_FMA
+zoom: 680.0, avg: 4.85, stddev: 0.0413
+zoom: 1000.0, avg: 5.42, stddev: 0.0894
+zoom: 2000.0, avg: 4.14, stddev: 0.0474
+zoom: 4000.0, avg: 2.41, stddev: 0.0312
+zoom: 8000.0, avg: 1.61, stddev: 0.0272
+zoom: 16000.0, avg: 1.30, stddev: 0.0226
+zoom: 32000.0, avg: 1.13, stddev: 0.0203
