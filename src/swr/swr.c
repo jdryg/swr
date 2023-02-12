@@ -349,12 +349,15 @@ static void swrDrawTriangleDispatch(swr_context* ctx, int32_t x0, int32_t y0, in
 
 extern void swrTransformPos2fTo2iRef(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
 extern void swrTransformPos2fTo2iSSE2(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
+extern void swrTransformPos2fTo2iAVX_FMA(uint32_t n, const float* posf, int32_t* posi, const float* mtx);
 
 static void swrTransformPos2fTo2iDispatch(uint32_t n, const float* posf, int32_t* posi, const float* mtx)
 {
 #if 1
 	const uint64_t cpuFeatures = core_cpuGetFeatures();
-	if ((cpuFeatures & CORE_CPU_FEATURE_SSE2) != 0) {
+	if ((cpuFeatures & (CORE_CPU_FEATURE_AVX2 | CORE_CPU_FEATURE_FMA)) == (CORE_CPU_FEATURE_AVX2 | CORE_CPU_FEATURE_FMA)) {
+		swr->transformPos2fTo2i = swrTransformPos2fTo2iAVX_FMA;
+	} else if ((cpuFeatures & CORE_CPU_FEATURE_SSE2) != 0) {
 		swr->transformPos2fTo2i = swrTransformPos2fTo2iSSE2;
 	} else {
 		swr->transformPos2fTo2i = swrTransformPos2fTo2iRef;

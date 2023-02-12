@@ -35,29 +35,25 @@ void swrTransformPos2fTo2iSSE2(uint32_t n, const float* posf, int32_t* posi, con
 		dst += 8;
 	}
 
-	const uint32_t rem = n & 3;
-	switch (rem) {
-	case 3: {
+	uint32_t rem = n & 3;
+	if (rem >= 2) {
+		const vec4f src_x0_y0_x1_y1 = vec4f_fromFloat4vu(&src[0]);
+
+		const vec4f src_x0_x0_x1_x1 = vec4f_shuffle(src_x0_y0_x1_y1, src_x0_y0_x1_y1, VEC4_SHUFFLE_XXZZ);
+		const vec4f src_y0_y0_y1_y1 = vec4f_shuffle(src_x0_y0_x1_y1, src_x0_y0_x1_y1, VEC4_SHUFFLE_YYWW);
+
+		const vec4f dst_x0_y0_x1_y1 = vec4f_madd(src_x0_x0_x1_x1, m0101, vec4f_madd(src_y0_y0_y1_y1, m2323, m4545));
+
+		vec4i_toInt4vu(vec4i_fromVec4f(dst_x0_y0_x1_y1), &dst[0]);
+
+		src += 4;
+		dst += 4;
+		rem -= 2;
+	}
+
+	if (rem) {
 		dst[0] = (int32_t)(mtx[0] * src[0] + mtx[2] * src[1] + mtx[4]);
 		dst[1] = (int32_t)(mtx[1] * src[0] + mtx[3] * src[1] + mtx[5]);
-		src += 2;
-		dst += 2;
-	} // fallthrough
-	case 2: {
-		dst[0] = (int32_t)(mtx[0] * src[0] + mtx[2] * src[1] + mtx[4]);
-		dst[1] = (int32_t)(mtx[1] * src[0] + mtx[3] * src[1] + mtx[5]);
-		src += 2;
-		dst += 2;
-	} // fallthrough
-	case 1: {
-		dst[0] = (int32_t)(mtx[0] * src[0] + mtx[2] * src[1] + mtx[4]);
-		dst[1] = (int32_t)(mtx[1] * src[0] + mtx[3] * src[1] + mtx[5]);
-		src += 2;
-		dst += 2;
-	} // fallthrough
-	case 0:
-	default:
-		break;
 	}
 }
 #else

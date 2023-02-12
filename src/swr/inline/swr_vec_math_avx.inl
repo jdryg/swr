@@ -19,9 +19,29 @@ static __forceinline vec4f vec4f_fromVec4i(vec4i x)
 	return VEC4F(_mm_cvtepi32_ps(x.m_IMM));
 }
 
+static __forceinline vec4f vec4f_fromVec8f_low(vec8f x)
+{
+	return VEC4F(_mm256_extractf128_ps(x.m_YMM, 0));
+}
+
+static __forceinline vec4f vec4f_fromVec8f_high(vec8f x)
+{
+	return VEC4F(_mm256_extractf128_ps(x.m_YMM, 1));
+}
+
 static __forceinline vec4f vec4f_fromFloat4(float x0, float x1, float x2, float x3)
 {
 	return VEC4F(_mm_set_ps(x3, x2, x1, x0));
+}
+
+static __forceinline vec4f vec4f_fromFloat4va(const float* arr)
+{
+	return VEC4F(_mm_load_ps(arr));
+}
+
+static __forceinline vec4f vec4f_fromFloat4vu(const float* arr)
+{
+	return VEC4F(_mm_loadu_ps(arr));
 }
 
 static __forceinline vec4f vec4f_fromRGBA8(uint32_t rgba8)
@@ -97,6 +117,8 @@ static __forceinline float vec4f_getW(vec4f a)
 {
 	return _mm_cvtss_f32(_mm_shuffle_ps(a.m_XMM, a.m_XMM, _MM_SHUFFLE(3, 3, 3, 3)));
 }
+
+#define vec4f_shuffle(a, b, mask) (vec4f){ .m_XMM = _mm_shuffle_ps(a.m_XMM, b.m_XMM, mask) }
 
 #define VEC4F_GET_FUNC(swizzle) \
 static __forceinline vec4f vec4f_get##swizzle(vec4f x) \
@@ -329,6 +351,16 @@ static __forceinline vec8f vec8f_fromFloat8(float x0, float x1, float x2, float 
 	return VEC8F(_mm256_set_ps(x7, x6, x5, x4, x3, x2, x1, x0));
 }
 
+static __forceinline vec8f vec8f_fromFloat8va(const float* arr)
+{
+	return VEC8F(_mm256_load_ps(arr));
+}
+
+static __forceinline vec8f vec8f_fromFloat8vu(const float* arr)
+{
+	return VEC8F(_mm256_loadu_ps(arr));
+}
+
 static __forceinline vec8f vec8f_add(vec8f a, vec8f b)
 {
 	return VEC8F(_mm256_add_ps(a.m_YMM, b.m_YMM));
@@ -363,9 +395,10 @@ static __forceinline vec8f vec8f_madd(vec8f a, vec8f b, vec8f c)
 #endif
 }
 
+#define vec8f_permute(x, mask4) (vec8f){ .m_YMM = _mm256_permute_ps(x.m_YMM, mask4) }
+
 #undef VEC8F
 
-#if defined(SWR_VEC_MATH_AVX2)
 #define VEC8I(ymm_reg) (vec8i){ .m_YMM = (ymm_reg) }
 
 static __forceinline vec8i vec8i_zero(void)
@@ -395,7 +428,7 @@ static __forceinline vec8i vec8i_fromInt8va(const int32_t* arr)
 
 static __forceinline void vec8i_toInt8vu(vec8i x, int32_t* arr)
 {
-	_mm256_storeu_epi32(arr, x.m_YMM);
+	_mm256_storeu_si256((__m256i*)arr, x.m_YMM);
 }
 
 static __forceinline void vec8i_toInt8va(vec8i x, int32_t* arr)
@@ -403,6 +436,7 @@ static __forceinline void vec8i_toInt8va(vec8i x, int32_t* arr)
 	_mm256_store_si256((__m256i*)arr, x.m_YMM);
 }
 
+#if defined(SWR_VEC_MATH_AVX2)
 static __forceinline void vec8i_toInt8va_masked(vec8i x, vec8i mask, int32_t* buffer)
 {
 #if 1
@@ -549,6 +583,7 @@ static __forceinline vec8i vec8i_packR32G32B32A32_to_RGBA8(vec8i r, vec8i g, vec
 	};
 	return VEC8I(_mm256_shuffle_epi8(r03_g03_b03_a03_r47_g47_b47_a47_u8, _mm256_load_si256((const __m256i*)mask_u8)));
 }
+#endif // defined(SWR_VEC_MATH_AVX2)
 
 static __forceinline bool vec8i_anyNegative(vec8i x)
 {
@@ -566,5 +601,3 @@ static __forceinline uint32_t vec8i_getSignMask(vec8i x)
 }
 
 #undef VEC8I
-
-#endif // SWR_VEC_MATH_AVX2

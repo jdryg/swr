@@ -49,9 +49,7 @@ typedef struct vec8f
 {
 	__m256 m_YMM;
 } vec8f;
-#endif
 
-#if defined(SWR_VEC_MATH_AVX2)
 typedef struct vec8i
 {
 	__m256i m_YMM;
@@ -61,6 +59,10 @@ typedef struct vec8i
 static vec4f vec4f_zero(void);
 static vec4f vec4f_fromFloat(float x);
 static vec4f vec4f_fromVec4i(vec4i x);
+#if defined(SWR_VEC_MATH_AVX) || defined(SWR_VEC_MATH_AVX2)
+static vec4f vec4f_fromVec8f_low(vec8f x);
+static vec4f vec4f_fromVec8f_high(vec8f x);
+#endif
 static vec4f vec4f_fromFloat4(float x0, float x1, float x2, float x3);
 static vec4f vec4f_fromFloat4va(const float* arr);
 static vec4f vec4f_fromFloat4vu(const float* arr);
@@ -120,6 +122,8 @@ static vec8f vec8f_zero(void);
 static vec8f vec8f_fromFloat(float x);
 static vec8f vec8f_fromVec8i(vec8i x);
 static vec8f vec8f_fromFloat8(float x0, float x1, float x2, float x3, float x4, float x5, float x6, float x7);
+static vec8f vec8f_fromFloat8va(const float* arr);
+static vec8f vec8f_fromFloat8vu(const float* arr);
 static vec8f vec8f_add(vec8f a, vec8f b);
 static vec8f vec8f_sub(vec8f a, vec8f b);
 static vec8f vec8f_mul(vec8f a, vec8f b);
@@ -134,6 +138,7 @@ static vec8i vec8i_fromInt8(int32_t x0, int32_t x1, int32_t x2, int32_t x3, int3
 static vec8i vec8i_fromInt8va(const int32_t* arr);
 static void vec8i_toInt8vu(vec8i x, int32_t* arr);
 static void vec8i_toInt8va(vec8i x, int32_t* arr);
+#if defined(SWR_VEC_MATH_AVX2)
 static void vec8i_toInt8va_masked(vec8i x, vec8i mask, int32_t* buffer);
 static void vec8i_toInt8va_maskedInv(vec8i x, vec8i maskInv, int32_t* buffer);
 static void vec8i_toInt8vu_maskedInv(vec8i x, vec8i maskInv, int32_t* buffer);
@@ -148,6 +153,7 @@ static vec8i vec8i_xor(vec8i a, vec8i b);
 static vec8i vec8i_sar(vec8i x, uint32_t shift);
 static vec8i vec8i_sal(vec8i x, uint32_t shift);
 static vec8i vec8i_packR32G32B32A32_to_RGBA8(vec8i r, vec8i g, vec8i b, vec8i a);
+#endif
 static bool vec8i_anyNegative(vec8i x);
 static bool vec8i_allNegative(vec8i x);
 static uint32_t vec8i_getSignMask(vec8i x);
