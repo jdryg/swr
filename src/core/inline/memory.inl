@@ -26,7 +26,7 @@ static inline int32_t core_memCmp(const void* lhs, const void* rhs, size_t n)
 	return mem_api->cmp(lhs, rhs, n);
 }
 
-static inline bool core_isAlignedPtr(void* ptr, uint64_t alignment)
+static inline bool core_isAlignedPtr(const void* ptr, uint64_t alignment)
 {
 	const uintptr_t mask = (uintptr_t)(alignment - 1);
 	return ((uintptr_t)ptr & mask) == 0;
