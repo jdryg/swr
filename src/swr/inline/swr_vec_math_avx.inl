@@ -91,7 +91,7 @@ static vec4f vec4f_ceil(vec4f x)
 
 static __forceinline vec4f vec4f_madd(vec4f a, vec4f b, vec4f c)
 {
-#if 1
+#if defined(SWR_VEC_MATH_FMA)
 	return VEC4F(_mm_fmadd_ps(a.m_XMM, b.m_XMM, c.m_XMM));
 #else
 	return VEC4F(_mm_add_ps(c.m_XMM, _mm_mul_ps(a.m_XMM, b.m_XMM)));
