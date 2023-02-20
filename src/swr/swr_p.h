@@ -30,6 +30,8 @@ typedef struct swr_context
 	swr_vertex_buffer m_VertexBuffers[2]; // { Position, Color }
 	uint32_t m_BoundBuffers;
 	swr_matrix2d m_WorldToScreenTransform;
+
+	uint8_t* m_ScratchBuffer; // 64 bytes per 8x8 tile (currently used by the AVX2+FMA version)
 } swr_context;
 
 #endif // SWR_SWR_P_H

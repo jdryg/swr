@@ -152,11 +152,16 @@ static vec8i vec8i_andnot(vec8i a, vec8i b);
 static vec8i vec8i_xor(vec8i a, vec8i b);
 static vec8i vec8i_sar(vec8i x, uint32_t shift);
 static vec8i vec8i_sal(vec8i x, uint32_t shift);
+static vec8i vec8i_slr(vec8i x, uint32_t shift);
+static vec8i vec8i_sll(vec8i x, uint32_t shift);
+static vec8i vec8i_sllv(vec8i x, vec8i shift);
+static vec8i vec8i_cmpeq(vec8i a, vec8i b);
 static vec8i vec8i_packR32G32B32A32_to_RGBA8(vec8i r, vec8i g, vec8i b, vec8i a);
 #endif
 static bool vec8i_anyNegative(vec8i x);
 static bool vec8i_allNegative(vec8i x);
 static uint32_t vec8i_getSignMask(vec8i x);
+static uint32_t vec8i_getByteSignMask(vec8i x);
 #endif
 
 #ifdef __cplusplus

@@ -538,8 +538,33 @@ static __forceinline vec8i vec8i_sal(vec8i x, uint32_t shift)
 	return VEC8I(_mm256_slli_epi32(x.m_YMM, shift));
 }
 
+static __forceinline vec8i vec8i_slr(vec8i x, uint32_t shift)
+{
+	return VEC8I(_mm256_srli_epi32(x.m_YMM, shift));
+}
+
+static __forceinline vec8i vec8i_sll(vec8i x, uint32_t shift)
+{
+	return VEC8I(_mm256_slli_epi32(x.m_YMM, shift));
+}
+
+static __forceinline vec8i vec8i_sllv(vec8i x, vec8i shift)
+{
+	return VEC8I(_mm256_sllv_epi32(x.m_YMM, shift.m_YMM));
+}
+
+static __forceinline vec8i vec8i_cmpeq(vec8i a, vec8i b)
+{
+	return VEC8I(_mm256_cmpeq_epi32(a.m_YMM, b.m_YMM));
+}
+
 static __forceinline vec8i vec8i_packR32G32B32A32_to_RGBA8(vec8i r, vec8i g, vec8i b, vec8i a)
 {
+#if 0
+	vec8i rg = vec8i_or(r, vec8i_sll(g, 8));
+	vec8i ba = vec8i_or(vec8i_sll(b, 16), vec8i_sll(a, 24));
+	return vec8i_or(rg, ba);
+#else
 	// (uint16_t){
 	//   r0, r1, r2, r3,
 	//   g0, g1, g2, g3,
@@ -582,6 +607,7 @@ static __forceinline vec8i vec8i_packR32G32B32A32_to_RGBA8(vec8i r, vec8i g, vec
 		3, 7, 11, 15,
 	};
 	return VEC8I(_mm256_shuffle_epi8(r03_g03_b03_a03_r47_g47_b47_a47_u8, _mm256_load_si256((const __m256i*)mask_u8)));
+#endif
 }
 #endif // defined(SWR_VEC_MATH_AVX2)
 
@@ -598,6 +624,11 @@ static __forceinline bool vec8i_allNegative(vec8i x)
 static __forceinline uint32_t vec8i_getSignMask(vec8i x)
 {
 	return _mm256_movemask_ps(_mm256_castsi256_ps(x.m_YMM));
+}
+
+static __forceinline uint32_t vec8i_getByteSignMask(vec8i x)
+{
+	return _mm256_movemask_epi8(x.m_YMM);
 }
 
 #undef VEC8I

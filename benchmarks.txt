@@ -35,10 +35,10 @@ zoom: 16000.0, avg: 1.71, stddev: 0.0484
 zoom: 32000.0, avg: 1.49, stddev: 0.0329
 
 AVX2_FMA
-zoom: 680.0, avg: 4.60, stddev: 0.0591
-zoom: 1000.0, avg: 5.13, stddev: 0.0626
-zoom: 2000.0, avg: 3.97, stddev: 0.0510
-zoom: 4000.0, avg: 2.32, stddev: 0.0360
-zoom: 8000.0, avg: 1.52, stddev: 0.0178
-zoom: 16000.0, avg: 1.23, stddev: 0.0181
-zoom: 32000.0, avg: 1.05, stddev: 0.0191
+zoom: 680.0, avg: 4.63, stddev: 0.0699
+zoom: 1000.0, avg: 4.76, stddev: 0.0466
+zoom: 2000.0, avg: 3.18, stddev: 0.0444
+zoom: 4000.0, avg: 1.87, stddev: 0.0347
+zoom: 8000.0, avg: 1.30, stddev: 0.0203
+zoom: 16000.0, avg: 1.10, stddev: 0.0154
+zoom: 32000.0, avg: 0.94, stddev: 0.0122
