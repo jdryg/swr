@@ -844,20 +844,15 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			const uint32_t mask0_3 = ~vec8i_getByteSignMask(v_mask0_3);
 			const uint32_t mask4_7 = ~vec8i_getByteSignMask(v_mask4_7);
 
-			if ((mask0_3 | mask4_7) == 0) {
-				w0_tileMin += edge0.m_dx << 3;
-				w1_tileMin += edge1.m_dx << 3;
-				w2_tileMin += edge2.m_dx << 3;
-				continue;
+			if ((mask0_3 | mask4_7) != 0) {
+				swr_tile_desc* tile = &tiles[numTiles];
+				tile->m_CoverageMask03 = mask0_3;
+				tile->m_CoverageMask47 = mask4_7;
+				tile->m_FrameBufferOffset = tileX + tileY * ctx->m_Width;
+				tile->m_BarycentricCoords[0] = w0_tileMin;
+				tile->m_BarycentricCoords[1] = w1_tileMin;
+				++numTiles;
 			}
-			
-			swr_tile_desc* tile = &tiles[numTiles];
-			tile->m_CoverageMask03 = mask0_3;
-			tile->m_CoverageMask47 = mask4_7;
-			tile->m_FrameBufferOffset = tileX + tileY * ctx->m_Width;
-			tile->m_BarycentricCoords[0] = w0_tileMin;
-			tile->m_BarycentricCoords[1] = w1_tileMin;
-			++numTiles;
 
 			w0_tileMin += edge0.m_dx << 3;
 			w1_tileMin += edge1.m_dx << 3;
