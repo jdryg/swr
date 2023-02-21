@@ -771,23 +771,29 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 
 	uint32_t numTiles = 0;
 	swr_tile_desc* tiles = (swr_tile_desc*)ctx->m_ScratchBuffer;
-	for (int32_t tileY = bboxMinY_aligned; tileY < bboxMaxY_aligned; tileY += 8) {
-		for (int32_t tileX = bboxMinX_aligned; tileX < bboxMaxX_aligned; tileX += 8) {
-			const int32_t w0_blockMin = swr_edgeEval(edge0, tileX, tileY);
-			const int32_t w1_blockMin = swr_edgeEval(edge1, tileX, tileY);
-			const int32_t w2_blockMin = swr_edgeEval(edge2, tileX, tileY);
 
-			const int32_t w0_trivialReject = w0_blockMin + trivialRejectOffset0;
-			const int32_t w1_trivialReject = w1_blockMin + trivialRejectOffset1;
-			const int32_t w2_trivialReject = w2_blockMin + trivialRejectOffset2;
+	int32_t w0_y = swr_edgeEval(edge0, bboxMinX_aligned, bboxMinY_aligned);
+	int32_t w1_y = swr_edgeEval(edge1, bboxMinX_aligned, bboxMinY_aligned);
+	int32_t w2_y = swr_edgeEval(edge2, bboxMinX_aligned, bboxMinY_aligned);
+	for (int32_t tileY = bboxMinY_aligned; tileY < bboxMaxY_aligned; tileY += 8) {
+		int32_t w0_tileMin = w0_y;
+		int32_t w1_tileMin = w1_y;
+		int32_t w2_tileMin = w2_y;
+		for (int32_t tileX = bboxMinX_aligned; tileX < bboxMaxX_aligned; tileX += 8) {
+			const int32_t w0_trivialReject = w0_tileMin + trivialRejectOffset0;
+			const int32_t w1_trivialReject = w1_tileMin + trivialRejectOffset1;
+			const int32_t w2_trivialReject = w2_tileMin + trivialRejectOffset2;
 			const int32_t trivialReject = w0_trivialReject | w1_trivialReject | w2_trivialReject;
 			if (trivialReject < 0) {
+				w0_tileMin += edge0.m_dx << 3;
+				w1_tileMin += edge1.m_dx << 3;
+				w2_tileMin += edge2.m_dx << 3;
 				continue;
 			}
 			
-			const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(w0_blockMin), v_edge0_dx_off);
-			const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(w1_blockMin), v_edge1_dx_off);
-			const vec8i v_w2_row0 = vec8i_add(vec8i_fromInt(w2_blockMin), v_edge2_dx_off);
+			const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(w0_tileMin), v_edge0_dx_off);
+			const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(w1_tileMin), v_edge1_dx_off);
+			const vec8i v_w2_row0 = vec8i_add(vec8i_fromInt(w2_tileMin), v_edge2_dx_off);
 			const vec8i v_w0_row1 = vec8i_add(v_w0_row0, v_edge0_dy);
 			const vec8i v_w1_row1 = vec8i_add(v_w1_row0, v_edge1_dy);
 			const vec8i v_w2_row1 = vec8i_add(v_w2_row0, v_edge2_dy);
@@ -839,6 +845,9 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			const uint32_t mask4_7 = ~vec8i_getByteSignMask(v_mask4_7);
 
 			if ((mask0_3 | mask4_7) == 0) {
+				w0_tileMin += edge0.m_dx << 3;
+				w1_tileMin += edge1.m_dx << 3;
+				w2_tileMin += edge2.m_dx << 3;
 				continue;
 			}
 			
@@ -846,10 +855,18 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			tile->m_CoverageMask03 = mask0_3;
 			tile->m_CoverageMask47 = mask4_7;
 			tile->m_FrameBufferOffset = tileX + tileY * ctx->m_Width;
-			tile->m_BarycentricCoords[0] = w0_blockMin;
-			tile->m_BarycentricCoords[1] = w1_blockMin;
+			tile->m_BarycentricCoords[0] = w0_tileMin;
+			tile->m_BarycentricCoords[1] = w1_tileMin;
 			++numTiles;
+
+			w0_tileMin += edge0.m_dx << 3;
+			w1_tileMin += edge1.m_dx << 3;
+			w2_tileMin += edge2.m_dx << 3;
 		}
+
+		w0_y += edge0.m_dy << 3;
+		w1_y += edge1.m_dy << 3;
+		w2_y += edge2.m_dy << 3;
 	}
 
 #if !SWR_CONFIG_DISABLE_PIXEL_SHADERS
