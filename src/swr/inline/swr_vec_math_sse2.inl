@@ -280,6 +280,11 @@ static __forceinline vec4i vec4i_sal(vec4i x, uint32_t shift)
 	return VEC4I(_mm_slli_epi32(x.m_IMM, shift));
 }
 
+static __forceinline vec4i vec4i_slr(vec4i x, uint32_t shift)
+{
+	return VEC4I(_mm_srli_epi32(x.m_IMM, shift));
+}
+
 static __forceinline vec4i vec4i_cmplt(vec4i a, vec4i b)
 {
 	return VEC4I(_mm_cmplt_epi32(a.m_IMM, b.m_IMM));
@@ -327,6 +332,11 @@ static __forceinline bool vec4i_allNegative(vec4i x)
 static __forceinline uint32_t vec4i_getSignMask(vec4i x)
 {
 	return _mm_movemask_ps(_mm_castsi128_ps(x.m_IMM));
+}
+
+static __forceinline uint32_t vec4i_getByteSignMask(vec4i x)
+{
+	return _mm_movemask_epi8(x.m_IMM);
 }
 
 #define VEC4I_GET_FUNC(swizzle) \

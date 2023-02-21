@@ -8,31 +8,31 @@ zoom: 16000.0, avg: 5.95, stddev: 0.1072
 zoom: 32000.0, avg: 5.49, stddev: 0.1355
 
 SSE2
-zoom: 680.0, avg: 5.79, stddev: 0.0971
-zoom: 1000.0, avg: 6.81, stddev: 0.1160
-zoom: 2000.0, avg: 4.99, stddev: 0.0632
-zoom: 4000.0, avg: 3.02, stddev: 0.0425
-zoom: 8000.0, avg: 2.11, stddev: 0.0309
-zoom: 16000.0, avg: 1.83, stddev: 0.0342
-zoom: 32000.0, avg: 1.63, stddev: 0.0267
+zoom: 680.0, avg: 5.74, stddev: 0.0880
+zoom: 1000.0, avg: 6.30, stddev: 0.0976
+zoom: 2000.0, avg: 4.57, stddev: 0.0685
+zoom: 4000.0, avg: 2.79, stddev: 0.0459
+zoom: 8000.0, avg: 1.99, stddev: 0.0523
+zoom: 16000.0, avg: 1.78, stddev: 0.0358
+zoom: 32000.0, avg: 1.52, stddev: 0.0416
 
 SSSE3
-zoom: 680.0, avg: 5.61, stddev: 0.0678
-zoom: 1000.0, avg: 6.64, stddev: 0.0872
-zoom: 2000.0, avg: 4.84, stddev: 0.0673
-zoom: 4000.0, avg: 2.80, stddev: 0.0752
-zoom: 8000.0, avg: 1.98, stddev: 0.0377
-zoom: 16000.0, avg: 1.71, stddev: 0.0434
-zoom: 32000.0, avg: 1.45, stddev: 0.0241
+zoom: 680.0, avg: 5.27, stddev: 0.1185
+zoom: 1000.0, avg: 5.79, stddev: 0.1292
+zoom: 2000.0, avg: 4.22, stddev: 0.0974
+zoom: 4000.0, avg: 2.59, stddev: 0.0771
+zoom: 8000.0, avg: 1.82, stddev: 0.0514
+zoom: 16000.0, avg: 1.64, stddev: 0.0320
+zoom: 32000.0, avg: 1.42, stddev: 0.0468
 
 SSE4.1
-zoom: 680.0, avg: 5.54, stddev: 0.0723
-zoom: 1000.0, avg: 6.62, stddev: 0.1180
-zoom: 2000.0, avg: 4.85, stddev: 0.0718
-zoom: 4000.0, avg: 2.81, stddev: 0.0550
-zoom: 8000.0, avg: 1.94, stddev: 0.0423
-zoom: 16000.0, avg: 1.71, stddev: 0.0484
-zoom: 32000.0, avg: 1.49, stddev: 0.0329
+zoom: 680.0, avg: 5.00, stddev: 0.1055
+zoom: 1000.0, avg: 5.51, stddev: 0.1254
+zoom: 2000.0, avg: 4.08, stddev: 0.0942
+zoom: 4000.0, avg: 2.52, stddev: 0.0530
+zoom: 8000.0, avg: 1.79, stddev: 0.1248
+zoom: 16000.0, avg: 1.57, stddev: 0.0175
+zoom: 32000.0, avg: 1.36, stddev: 0.0144
 
 AVX2_FMA
 zoom: 680.0, avg: 4.50, stddev: 0.0468

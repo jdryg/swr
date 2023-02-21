@@ -548,7 +548,7 @@ static __forceinline void rasterizeTile8x8_constColor(uint32_t color, uint32_t c
 	}
 }
 
-static __forceinline rasterizeTile8x8_varColor(vec8f v_l0, vec8f v_l1, vec8f v_dl0, vec8f v_dl1, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t coverageMask03, uint32_t coverageMask47, uint32_t* tileFB, uint32_t rowStride)
+static __forceinline void rasterizeTile8x8_varColor(vec8f v_l0, vec8f v_l1, vec8f v_dl0, vec8f v_dl1, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t coverageMask03, uint32_t coverageMask47, uint32_t* tileFB, uint32_t rowStride)
 {
 	const vec8f v_dcr = vec8f_madd(va_r.m_dVal12, v_dl1, vec8f_mul(va_r.m_dVal02, v_dl0));
 	const vec8f v_dcg = vec8f_madd(va_g.m_dVal12, v_dl1, vec8f_mul(va_g.m_dVal02, v_dl0));
