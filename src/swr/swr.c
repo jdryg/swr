@@ -72,15 +72,17 @@ static swr_context* swrCreateContext(core_allocator_i* allocator, uint32_t w, ui
 	swrMatrix2DIdentity(&ctx->m_WorldToScreenTransform);
 
 	{
-		const uint32_t numTilesX = (w >> 3) + 1;
-		const uint32_t numTilesY = (h >> 3) + 1;
+		const uint32_t numTilesX = core_roundUp(w, SWR_CONFIG_TILEBUF_TILE_WIDTH) / SWR_CONFIG_TILEBUF_TILE_WIDTH;
+		const uint32_t numTilesY = core_roundUp(h, SWR_CONFIG_TILEBUF_TILE_HEIGHT) / SWR_CONFIG_TILEBUF_TILE_HEIGHT;
 		const uint32_t totalTiles = numTilesX * numTilesY;
-		const uint32_t tileScratchBuffer = 64;
-		ctx->m_ScratchBuffer = (uint8_t*)CORE_ALIGNED_ALLOC(allocator, tileScratchBuffer * totalTiles, 32);
-		if (!ctx->m_ScratchBuffer) {
+		uint8_t* scratchBuffer = (uint8_t*)CORE_ALIGNED_ALLOC(allocator, SWR_CONFIG_TILEBUF_TILE_SIZE * totalTiles * 2, 32);
+		if (!scratchBuffer) {
 			swrDestroyContext(allocator, ctx);
 			return NULL;
 		}
+
+		ctx->m_TileBuffer[0] = scratchBuffer;
+		ctx->m_TileBuffer[1] = scratchBuffer + (totalTiles * SWR_CONFIG_TILEBUF_TILE_SIZE);
 	}
 
 	return ctx;

@@ -6,7 +6,8 @@
 #define SWR_VEC_MATH_FMA
 #include "swr_vec_math.h"
 
-#define SWR_CONFIG_TILE_HEIGHT 4 // Either 4 or 8; width is always 8
+#define SWR_CONFIG_CHECK_CONST_COLOR 0 // Test if all 3 vertex colors are equal and avoid interpolating over the triangle.
+#define SWR_CONFIG_TILE_HEIGHT       4 // Either 4 or 8; width is always 8
 
 typedef struct swr_edge
 {
@@ -23,9 +24,6 @@ typedef struct swr_vertex_attrib_data
 	vec8f m_dVal12;
 } swr_vertex_attrib_data;
 
-// NOTE: swr_context::m_ScratchBuffer has enough room for 8x8 64-byte tiles.
-// The tiles in this version are either 8x8 with a size of 20 bytes or 8x4 with a size of 16 bytes. 
-// 1x 8x8 tile = 2x 8x4 tiles => 32 bytes per tile < 16
 typedef struct swr_tile_desc
 {
 	uint32_t m_CoverageMask03;
@@ -35,12 +33,6 @@ typedef struct swr_tile_desc
 	uint32_t m_FrameBufferOffset;
 	int32_t m_BarycentricCoords[2];
 } swr_tile_desc;
-
-#if SWR_CONFIG_TILE_HEIGHT == 8
-static_assert(sizeof(swr_tile_desc) <= 64, "sizeof(swr_tile_desc) should be at most 64 bytes");
-#else
-static_assert(sizeof(swr_tile_desc) <= 32, "sizeof(swr_tile_desc) should be at most 32 bytes");
-#endif
 
 static __forceinline swr_edge swr_edgeInit(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
@@ -380,7 +372,7 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	const vec8i v_signMask = vec8i_fromInt(0x80000000);
 
 	uint32_t numTiles = 0;
-	swr_tile_desc* tiles = (swr_tile_desc*)ctx->m_ScratchBuffer;
+	swr_tile_desc* tiles = (swr_tile_desc*)ctx->m_TileBuffer[0];
 
 	int32_t w0_y = swr_edgeEval(edge0, bboxMinX_aligned, bboxMinY_aligned);
 	int32_t w1_y = swr_edgeEval(edge1, bboxMinX_aligned, bboxMinY_aligned);
@@ -486,61 +478,90 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 		w2_y += edge2.m_dy * SWR_CONFIG_TILE_HEIGHT;
 	}
 
-#if !SWR_CONFIG_DISABLE_PIXEL_SHADERS
-	// Prepare interpolated attributes
-	const vec4f v_c0 = vec4f_fromRGBA8(color0);
-	const vec4f v_c1 = vec4f_fromRGBA8(color1);
-	const vec4f v_c2 = vec4f_fromRGBA8(color2);
-	const vec4f v_c02 = vec4f_sub(v_c0, v_c2);
-	const vec4f v_c12 = vec4f_sub(v_c1, v_c2);
-
-	const swr_vertex_attrib_data va_r = swr_vertexAttribInit(vec4f_getX(v_c2), vec4f_getX(v_c02), vec4f_getX(v_c12));
-	const swr_vertex_attrib_data va_g = swr_vertexAttribInit(vec4f_getY(v_c2), vec4f_getY(v_c02), vec4f_getY(v_c12));
-	const swr_vertex_attrib_data va_b = swr_vertexAttribInit(vec4f_getZ(v_c2), vec4f_getZ(v_c02), vec4f_getZ(v_c12));
-	const swr_vertex_attrib_data va_a = swr_vertexAttribInit(vec4f_getW(v_c2), vec4f_getW(v_c02), vec4f_getW(v_c12));
-
-	// Barycentric coordinate normalization
-	const vec8f v_inv_area = vec8f_fromFloat(1.0f / (float)iarea);
-
-	const vec8f v_dl0 = vec8f_mul(vec8f_fromVec8i(v_edge0_dy), v_inv_area);
-	const vec8f v_dl1 = vec8f_mul(vec8f_fromVec8i(v_edge1_dy), v_inv_area);
-#endif
-
-	for (uint32_t iTile = 0; iTile < numTiles; ++iTile) {
-		const swr_tile_desc* tile = &tiles[iTile];
-#if SWR_CONFIG_DISABLE_PIXEL_SHADERS
-		rasterizeTile8x8_constColor(
-			0xFFFFFFFFu, 
-			tile->m_CoverageMask03, 
-#if SWR_CONFIG_TILE_8x8
-			tile->m_CoverageMask47, 
-#else
-			0,
-#endif
-			&ctx->m_FrameBuffer[tile->m_FrameBufferOffset], 
-			ctx->m_Width
-		);
-#else
-		const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(tile->m_BarycentricCoords[0]), v_edge0_dx_off);
-		const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(tile->m_BarycentricCoords[1]), v_edge1_dx_off);
-		const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row0), v_inv_area);
-		const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row0), v_inv_area);
-		rasterizeTile8x8_varColor(
-			v_l0, v_l1, 
-			v_dl0, v_dl1, 
-			va_r, 
-			va_g, 
-			va_b, 
-			va_a, 
-			tile->m_CoverageMask03, 
+#if SWR_CONFIG_CHECK_CONST_COLOR
+	// If all 3 vertex colors are equal there is no need for interpolation.
+	// NOTE: I don't know if this actually helps in the general case but for the
+	// 6502 mesh I'm currently testing with where each layer has a constant color
+	// it does help a lot.
+	if (color0 == color1 && color0 == color2) {
+		for (uint32_t iTile = 0; iTile < numTiles; ++iTile) {
+			const swr_tile_desc* tile = &tiles[iTile];
+			const uint32_t mask03 = tile->m_CoverageMask03;
+			const uint32_t mask47 =
 #if SWR_CONFIG_TILE_HEIGHT == 8
-			tile->m_CoverageMask47, 
+			tile->m_CoverageMask47;
+#else // SWR_CONFIG_TILE_HEIGHT
+			0;
+#endif
+			rasterizeTile8x8_constColor(
+				color0,
+				mask03,
+				mask47,
+				&ctx->m_FrameBuffer[tile->m_FrameBufferOffset],
+				ctx->m_Width
+			);
+		}
+	} else {
+#else // SWR_CONFIG_CHECK_CONST_COLOR
+	{
+#endif // SWR_CONFIG_CHECK_CONST_COLOR
+
+#if !SWR_CONFIG_DISABLE_PIXEL_SHADERS
+		// Prepare interpolated attributes
+		const vec4f v_c0 = vec4f_fromRGBA8(color0);
+		const vec4f v_c1 = vec4f_fromRGBA8(color1);
+		const vec4f v_c2 = vec4f_fromRGBA8(color2);
+		const vec4f v_c02 = vec4f_sub(v_c0, v_c2);
+		const vec4f v_c12 = vec4f_sub(v_c1, v_c2);
+
+		const swr_vertex_attrib_data va_r = swr_vertexAttribInit(vec4f_getX(v_c2), vec4f_getX(v_c02), vec4f_getX(v_c12));
+		const swr_vertex_attrib_data va_g = swr_vertexAttribInit(vec4f_getY(v_c2), vec4f_getY(v_c02), vec4f_getY(v_c12));
+		const swr_vertex_attrib_data va_b = swr_vertexAttribInit(vec4f_getZ(v_c2), vec4f_getZ(v_c02), vec4f_getZ(v_c12));
+		const swr_vertex_attrib_data va_a = swr_vertexAttribInit(vec4f_getW(v_c2), vec4f_getW(v_c02), vec4f_getW(v_c12));
+
+		// Barycentric coordinate normalization
+		const vec8f v_inv_area = vec8f_fromFloat(1.0f / (float)iarea);
+
+		const vec8f v_dl0 = vec8f_mul(vec8f_fromVec8i(v_edge0_dy), v_inv_area);
+		const vec8f v_dl1 = vec8f_mul(vec8f_fromVec8i(v_edge1_dy), v_inv_area);
+#endif
+
+		for (uint32_t iTile = 0; iTile < numTiles; ++iTile) {
+			const swr_tile_desc* tile = &tiles[iTile];
+			const uint32_t mask03 = tile->m_CoverageMask03;
+			const uint32_t mask47 =
+#if SWR_CONFIG_TILE_HEIGHT == 8
+				tile->m_CoverageMask47;
+#else // SWR_CONFIG_TILE_HEIGHT
+				0;
+#endif
+
+#if SWR_CONFIG_DISABLE_PIXEL_SHADERS
+			rasterizeTile8x8_constColor(
+				0xFFFFFFFFu,
+				mask03,
+				mask47,
+				&ctx->m_FrameBuffer[tile->m_FrameBufferOffset],
+				ctx->m_Width
+			);
 #else
-			0,
+			const vec8i v_w0_row0 = vec8i_add(vec8i_fromInt(tile->m_BarycentricCoords[0]), v_edge0_dx_off);
+			const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(tile->m_BarycentricCoords[1]), v_edge1_dx_off);
+			const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row0), v_inv_area);
+			const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row0), v_inv_area);
+			rasterizeTile8x8_varColor(
+				v_l0, v_l1,
+				v_dl0, v_dl1,
+				va_r,
+				va_g,
+				va_b,
+				va_a,
+				mask03,
+				mask47,
+				&ctx->m_FrameBuffer[tile->m_FrameBufferOffset],
+				ctx->m_Width
+			);
 #endif
-			&ctx->m_FrameBuffer[tile->m_FrameBufferOffset], 
-			ctx->m_Width
-		);
-#endif
+		}
 	}
 }

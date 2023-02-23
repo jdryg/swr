@@ -5,6 +5,13 @@
 
 typedef struct core_allocator_i core_allocator_i;
 
+// Make sure enough memory is allocated for all version of drawTriangle function.
+// The tile buffers are used internally to keep track if tile info (might be different 
+// in each version of the code).
+#define SWR_CONFIG_TILEBUF_TILE_WIDTH  4
+#define SWR_CONFIG_TILEBUF_TILE_HEIGHT 4
+#define SWR_CONFIG_TILEBUF_TILE_SIZE   64
+
 typedef struct swr_vertex_buffer
 {
 	const void* m_Ptr;
@@ -31,7 +38,7 @@ typedef struct swr_context
 	uint32_t m_BoundBuffers;
 	swr_matrix2d m_WorldToScreenTransform;
 
-	uint8_t* m_ScratchBuffer; // 64 bytes per 8x8 tile (currently used by the AVX2+FMA version)
+	uint8_t* m_TileBuffer[2];
 } swr_context;
 
 #endif // SWR_SWR_P_H

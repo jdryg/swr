@@ -20,17 +20,12 @@ typedef struct swr_vertex_attrib_data
 	vec4f m_dVal12;
 } swr_vertex_attrib_data;
 
-// NOTE: swr_context::m_ScratchBuffer has enough room for 8x8 64-byte tiles.
-// The tiles in this version are 4x4 with a size of 16 bytes. 
-// 1x 8x8 tile = 4x 4x4 tiles => 16 bytes per tile.
 typedef struct swr_tile_desc
 {
 	uint32_t m_CoverageMask;
 	uint32_t m_FrameBufferOffset;
 	int32_t m_BarycentricCoords[2];
 } swr_tile_desc;
-
-static_assert(sizeof(swr_tile_desc) <= 16, "sizeof(swr_tile_desc) should be 16 bytes");
 
 static __forceinline swr_edge swr_edgeInit(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
@@ -266,7 +261,7 @@ void swrDrawTriangleSSE2(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, i
 	const vec4i v_signMask = vec4i_fromInt(0x80000000);
 
 	uint32_t numTiles = 0;
-	swr_tile_desc* tiles = (swr_tile_desc*)ctx->m_ScratchBuffer;
+	swr_tile_desc* tiles = (swr_tile_desc*)ctx->m_TileBuffer[0];
 
 	int32_t w0_y = swr_edgeEval(edge0, bboxMinX_aligned, bboxMinY_aligned);
 	int32_t w1_y = swr_edgeEval(edge1, bboxMinX_aligned, bboxMinY_aligned);
