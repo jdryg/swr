@@ -7,7 +7,6 @@
 #include "swr_vec_math.h"
 
 #define SWR_CONFIG_CHECK_CONST_COLOR 0 // Test if all 3 vertex colors are equal and avoid interpolating over the triangle.
-#define SWR_CONFIG_TILE_HEIGHT       4 // Either 4 or 8; width is always 8
 
 typedef struct swr_edge
 {
@@ -26,10 +25,7 @@ typedef struct swr_vertex_attrib_data
 
 typedef struct swr_tile_desc
 {
-	uint32_t m_CoverageMask03;
-#if SWR_CONFIG_TILE_HEIGHT == 8
-	uint32_t m_CoverageMask47;
-#endif
+	uint32_t m_CoverageMask;
 	uint32_t m_FrameBufferOffset;
 	int32_t m_BarycentricCoords[2];
 } swr_tile_desc;
@@ -68,7 +64,7 @@ static __forceinline vec8f swr_vertexAttribEval(swr_vertex_attrib_data va, vec8f
 	return vec8f_madd(va.m_dVal02, w0, vec8f_madd(va.m_dVal12, w1, va.m_Val2));
 }
 
-static __forceinline void rasterizeTile8x8_constColor(uint32_t color, uint32_t coverageMask03, uint32_t coverageMask47, uint32_t* tileFB, uint32_t rowStride)
+static __forceinline void rasterizeTile_constColor(uint32_t color, uint32_t coverageMask03, uint32_t* tileFB, uint32_t rowStride)
 {
 	const vec8i rgba = vec8i_fromInt(color);
 
@@ -105,43 +101,9 @@ static __forceinline void rasterizeTile8x8_constColor(uint32_t color, uint32_t c
 
 		tileFB += rowStride;
 	}
-
-#if SWR_CONFIG_TILE_HEIGHT == 8
-	const vec8i v_coverageMask47 = vec8i_fromInt(coverageMask47);
-
-	// Row #4
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(31, 27, 23, 19, 15, 11, 7, 3));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-
-		tileFB += rowStride;
-	}
-
-	// Row #5
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(30, 26, 22, 18, 14, 10, 6, 2));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-
-		tileFB += rowStride;
-	}
-
-	// Row #6
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(29, 25, 21, 17, 13, 9, 5, 1));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-
-		tileFB += rowStride;
-	}
-
-	// Row #7
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(28, 24, 20, 16, 12, 8, 4, 0));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-	}
-#endif
 }
 
-static __forceinline void rasterizeTile8x8_varColor(vec8f v_l0, vec8f v_l1, vec8f v_dl0, vec8f v_dl1, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t coverageMask03, uint32_t coverageMask47, uint32_t* tileFB, uint32_t rowStride)
+static __forceinline void rasterizeTile_varColor(vec8f v_l0, vec8f v_l1, vec8f v_dl0, vec8f v_dl1, swr_vertex_attrib_data va_r, swr_vertex_attrib_data va_g, swr_vertex_attrib_data va_b, swr_vertex_attrib_data va_a, uint32_t coverageMask03, uint32_t* tileFB, uint32_t rowStride)
 {
 	const vec8f v_dcr = vec8f_madd(va_r.m_dVal12, v_dl1, vec8f_mul(va_r.m_dVal02, v_dl0));
 	const vec8f v_dcg = vec8f_madd(va_g.m_dVal12, v_dl1, vec8f_mul(va_g.m_dVal02, v_dl0));
@@ -206,56 +168,6 @@ static __forceinline void rasterizeTile8x8_varColor(vec8f v_l0, vec8f v_l1, vec8
 		v_cb = vec8f_add(v_cb, v_dcb);
 		v_ca = vec8f_add(v_ca, v_dca);
 	}
-
-#if SWR_CONFIG_TILE_HEIGHT == 8
-	const vec8i v_coverageMask47 = vec8i_fromInt(coverageMask47);
-
-	// Row #4
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(31, 27, 23, 19, 15, 11, 7, 3));
-		const vec8i rgba = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-
-		tileFB += rowStride;
-		v_cr = vec8f_add(v_cr, v_dcr);
-		v_cg = vec8f_add(v_cg, v_dcg);
-		v_cb = vec8f_add(v_cb, v_dcb);
-		v_ca = vec8f_add(v_ca, v_dca);
-	}
-
-	// Row #5
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(30, 26, 22, 18, 14, 10, 6, 2));
-		const vec8i rgba = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-
-		tileFB += rowStride;
-		v_cr = vec8f_add(v_cr, v_dcr);
-		v_cg = vec8f_add(v_cg, v_dcg);
-		v_cb = vec8f_add(v_cb, v_dcb);
-		v_ca = vec8f_add(v_ca, v_dca);
-	}
-
-	// Row #6
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(29, 25, 21, 17, 13, 9, 5, 1));
-		const vec8i rgba = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-
-		tileFB += rowStride;
-		v_cr = vec8f_add(v_cr, v_dcr);
-		v_cg = vec8f_add(v_cg, v_dcg);
-		v_cb = vec8f_add(v_cb, v_dcb);
-		v_ca = vec8f_add(v_ca, v_dca);
-	}
-
-	// Row #7
-	{
-		const vec8i pixelMask = vec8i_sllv(v_coverageMask47, vec8i_fromInt8(28, 24, 20, 16, 12, 8, 4, 0));
-		const vec8i rgba = vec8i_packR32G32B32A32_to_RGBA8(vec8i_fromVec8f(v_cr), vec8i_fromVec8f(v_cg), vec8i_fromVec8f(v_cb), vec8i_fromVec8f(v_ca));
-		vec8i_toInt8va_masked(rgba, pixelMask, tileFB);
-	}
-#endif
 }
 
 void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, uint32_t color0, uint32_t color1, uint32_t color2)
@@ -292,12 +204,12 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 		bboxMinX_aligned = ctx->m_Width - n * 8;
 	}
 
-	int32_t bboxMinY_aligned = core_roundDown(bboxMinY, SWR_CONFIG_TILE_HEIGHT);
-	int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY + 1, SWR_CONFIG_TILE_HEIGHT);
+	int32_t bboxMinY_aligned = core_roundDown(bboxMinY, 4);
+	int32_t bboxMaxY_aligned = core_roundUp(bboxMaxY + 1, 4);
 	if (bboxMaxY_aligned >= (int32_t)ctx->m_Height) {
-		const uint32_t n = (bboxMaxY_aligned - bboxMinY_aligned) / SWR_CONFIG_TILE_HEIGHT;
+		const uint32_t n = (bboxMaxY_aligned - bboxMinY_aligned) / 4;
 		bboxMaxY_aligned = ctx->m_Height;
-		bboxMinY_aligned = ctx->m_Height - n * SWR_CONFIG_TILE_HEIGHT;
+		bboxMinY_aligned = ctx->m_Height - n * 4;
 	}
 
 	const swr_edge edge0 = swr_edgeInit(x2, y2, x1, y1);
@@ -340,15 +252,9 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	// functions at the respective TRCs are all positive but no pixel will be rasterized because
 	// the pixel masks generated by each edge function do not intersect.
 	// 
-#if SWR_CONFIG_TILE_HEIGHT == 8
-	const int32_t trivialRejectOffset0 = (core_maxi32(edge0.m_dx, 0) + core_maxi32(edge0.m_dy, 0)) * 7;
-	const int32_t trivialRejectOffset1 = (core_maxi32(edge1.m_dx, 0) + core_maxi32(edge1.m_dy, 0)) * 7;
-	const int32_t trivialRejectOffset2 = (core_maxi32(edge2.m_dx, 0) + core_maxi32(edge2.m_dy, 0)) * 7;
-#else
 	const int32_t trivialRejectOffset0 = (core_maxi32(edge0.m_dx, 0) * 7) + (core_maxi32(edge0.m_dy, 0) * 3);
 	const int32_t trivialRejectOffset1 = (core_maxi32(edge1.m_dx, 0) * 7) + (core_maxi32(edge1.m_dy, 0) * 3);
 	const int32_t trivialRejectOffset2 = (core_maxi32(edge2.m_dx, 0) * 7) + (core_maxi32(edge2.m_dy, 0) * 3);
-#endif
 
 	const vec8i v_pixelOffsets = vec8i_fromInt8(0, 1, 2, 3, 4, 5, 6, 7);
 	const vec8i v_edge0_dx_off = vec8i_mullo(vec8i_fromInt(edge0.m_dx), v_pixelOffsets);
@@ -363,11 +269,6 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	const vec8i v_edge0_dy3 = vec8i_add(v_edge0_dy, v_edge0_dy2);
 	const vec8i v_edge1_dy3 = vec8i_add(v_edge1_dy, v_edge1_dy2);
 	const vec8i v_edge2_dy3 = vec8i_add(v_edge2_dy, v_edge2_dy2);
-#if SWR_CONFIG_TILE_HEIGHT == 8
-	const vec8i v_edge0_dy4 = vec8i_add(v_edge0_dy2, v_edge0_dy2);
-	const vec8i v_edge1_dy4 = vec8i_add(v_edge1_dy2, v_edge1_dy2);
-	const vec8i v_edge2_dy4 = vec8i_add(v_edge2_dy2, v_edge2_dy2);
-#endif
 
 	const vec8i v_signMask = vec8i_fromInt(0x80000000);
 
@@ -377,7 +278,7 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	int32_t w0_y = swr_edgeEval(edge0, bboxMinX_aligned, bboxMinY_aligned);
 	int32_t w1_y = swr_edgeEval(edge1, bboxMinX_aligned, bboxMinY_aligned);
 	int32_t w2_y = swr_edgeEval(edge2, bboxMinX_aligned, bboxMinY_aligned);
-	for (int32_t tileY = bboxMinY_aligned; tileY < bboxMaxY_aligned; tileY += SWR_CONFIG_TILE_HEIGHT) {
+	for (int32_t tileY = bboxMinY_aligned; tileY < bboxMaxY_aligned; tileY += 4) {
 		int32_t w0_tileMin = w0_y;
 		int32_t w1_tileMin = w1_y;
 		int32_t w2_tileMin = w2_y;
@@ -405,63 +306,25 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			const vec8i v_w0_row3 = vec8i_add(v_w0_row0, v_edge0_dy3);
 			const vec8i v_w1_row3 = vec8i_add(v_w1_row0, v_edge1_dy3);
 			const vec8i v_w2_row3 = vec8i_add(v_w2_row0, v_edge2_dy3);
-#if SWR_CONFIG_TILE_HEIGHT == 8
-			const vec8i v_w0_row4 = vec8i_add(v_w0_row0, v_edge0_dy4);
-			const vec8i v_w1_row4 = vec8i_add(v_w1_row0, v_edge1_dy4);
-			const vec8i v_w2_row4 = vec8i_add(v_w2_row0, v_edge2_dy4);
-			const vec8i v_w0_row5 = vec8i_add(v_w0_row4, v_edge0_dy);
-			const vec8i v_w1_row5 = vec8i_add(v_w1_row4, v_edge1_dy);
-			const vec8i v_w2_row5 = vec8i_add(v_w2_row4, v_edge2_dy);
-			const vec8i v_w0_row6 = vec8i_add(v_w0_row4, v_edge0_dy2);
-			const vec8i v_w1_row6 = vec8i_add(v_w1_row4, v_edge1_dy2);
-			const vec8i v_w2_row6 = vec8i_add(v_w2_row4, v_edge2_dy2);
-			const vec8i v_w0_row7 = vec8i_add(v_w0_row4, v_edge0_dy3);
-			const vec8i v_w1_row7 = vec8i_add(v_w1_row4, v_edge1_dy3);
-			const vec8i v_w2_row7 = vec8i_add(v_w2_row4, v_edge2_dy3);
-#endif
 
 			const vec8i v_mask0 = vec8i_or3(v_w0_row0, v_w1_row0, v_w2_row0);
 			const vec8i v_mask1 = vec8i_or3(v_w0_row1, v_w1_row1, v_w2_row1);
 			const vec8i v_mask2 = vec8i_or3(v_w0_row2, v_w1_row2, v_w2_row2);
 			const vec8i v_mask3 = vec8i_or3(v_w0_row3, v_w1_row3, v_w2_row3);
-#if SWR_CONFIG_TILE_HEIGHT == 8
-			const vec8i v_mask4 = vec8i_or3(v_w0_row4, v_w1_row4, v_w2_row4);
-			const vec8i v_mask5 = vec8i_or3(v_w0_row5, v_w1_row5, v_w2_row5);
-			const vec8i v_mask6 = vec8i_or3(v_w0_row6, v_w1_row6, v_w2_row6);
-			const vec8i v_mask7 = vec8i_or3(v_w0_row7, v_w1_row7, v_w2_row7);
-#endif
 
 			const vec8i v_mask0_sign = vec8i_and(v_mask0, v_signMask);
 			const vec8i v_mask1_sign = vec8i_and(v_mask1, v_signMask);
 			const vec8i v_mask2_sign = vec8i_and(v_mask2, v_signMask);
 			const vec8i v_mask3_sign = vec8i_and(v_mask3, v_signMask);
-#if SWR_CONFIG_TILE_HEIGHT == 8
-			const vec8i v_mask4_sign = vec8i_and(v_mask4, v_signMask);
-			const vec8i v_mask5_sign = vec8i_and(v_mask5, v_signMask);
-			const vec8i v_mask6_sign = vec8i_and(v_mask6, v_signMask);
-			const vec8i v_mask7_sign = vec8i_and(v_mask7, v_signMask);
-#endif
 
 			const vec8i v_mask01 = vec8i_or(vec8i_slr(v_mask0_sign, 24), vec8i_slr(v_mask1_sign, 16));
 			const vec8i v_mask23 = vec8i_or(vec8i_slr(v_mask2_sign, 8), v_mask3_sign);
 			const vec8i v_mask0_3 = vec8i_or(v_mask01, v_mask23);
 			const uint32_t mask0_3 = ~vec8i_getByteSignMask(v_mask0_3);
 
-#if SWR_CONFIG_TILE_HEIGHT == 8
-			const vec8i v_mask45 = vec8i_or(vec8i_slr(v_mask4_sign, 24), vec8i_slr(v_mask5_sign, 16));
-			const vec8i v_mask67 = vec8i_or(vec8i_slr(v_mask6_sign, 8), v_mask7_sign);
-			const vec8i v_mask4_7 = vec8i_or(v_mask45, v_mask67);
-			const uint32_t mask4_7 = ~vec8i_getByteSignMask(v_mask4_7);
-#else
-			const uint32_t mask4_7 = 0;
-#endif
-
-			if ((mask0_3 | mask4_7) != 0) {
+			if (mask0_3 != 0) {
 				swr_tile_desc* tile = &tiles[numTiles];
-				tile->m_CoverageMask03 = mask0_3;
-#if SWR_CONFIG_TILE_HEIGHT == 8
-				tile->m_CoverageMask47 = mask4_7;
-#endif
+				tile->m_CoverageMask = mask0_3;
 				tile->m_FrameBufferOffset = tileX + tileY * ctx->m_Width;
 				tile->m_BarycentricCoords[0] = w0_tileMin;
 				tile->m_BarycentricCoords[1] = w1_tileMin;
@@ -473,9 +336,9 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			w2_tileMin += edge2.m_dx << 3;
 		}
 
-		w0_y += edge0.m_dy * SWR_CONFIG_TILE_HEIGHT;
-		w1_y += edge1.m_dy * SWR_CONFIG_TILE_HEIGHT;
-		w2_y += edge2.m_dy * SWR_CONFIG_TILE_HEIGHT;
+		w0_y += edge0.m_dy << 2;
+		w1_y += edge1.m_dy << 2;
+		w2_y += edge2.m_dy << 2;
 	}
 
 #if SWR_CONFIG_CHECK_CONST_COLOR
@@ -486,17 +349,9 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 	if (color0 == color1 && color0 == color2) {
 		for (uint32_t iTile = 0; iTile < numTiles; ++iTile) {
 			const swr_tile_desc* tile = &tiles[iTile];
-			const uint32_t mask03 = tile->m_CoverageMask03;
-			const uint32_t mask47 =
-#if SWR_CONFIG_TILE_HEIGHT == 8
-			tile->m_CoverageMask47;
-#else // SWR_CONFIG_TILE_HEIGHT
-			0;
-#endif
-			rasterizeTile8x8_constColor(
+			rasterizeTile_constColor(
 				color0,
-				mask03,
-				mask47,
+				tile->m_CoverageMask,
 				&ctx->m_FrameBuffer[tile->m_FrameBufferOffset],
 				ctx->m_Width
 			);
@@ -528,19 +383,10 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 
 		for (uint32_t iTile = 0; iTile < numTiles; ++iTile) {
 			const swr_tile_desc* tile = &tiles[iTile];
-			const uint32_t mask03 = tile->m_CoverageMask03;
-			const uint32_t mask47 =
-#if SWR_CONFIG_TILE_HEIGHT == 8
-				tile->m_CoverageMask47;
-#else // SWR_CONFIG_TILE_HEIGHT
-				0;
-#endif
-
 #if SWR_CONFIG_DISABLE_PIXEL_SHADERS
-			rasterizeTile8x8_constColor(
+			rasterizeTile_constColor(
 				0xFFFFFFFFu,
-				mask03,
-				mask47,
+				tile->m_CoverageMask,
 				&ctx->m_FrameBuffer[tile->m_FrameBufferOffset],
 				ctx->m_Width
 			);
@@ -549,15 +395,14 @@ void swrDrawTriangleAVX2_FMA(swr_context* ctx, int32_t x0, int32_t y0, int32_t x
 			const vec8i v_w1_row0 = vec8i_add(vec8i_fromInt(tile->m_BarycentricCoords[1]), v_edge1_dx_off);
 			const vec8f v_l0 = vec8f_mul(vec8f_fromVec8i(v_w0_row0), v_inv_area);
 			const vec8f v_l1 = vec8f_mul(vec8f_fromVec8i(v_w1_row0), v_inv_area);
-			rasterizeTile8x8_varColor(
+			rasterizeTile_varColor(
 				v_l0, v_l1,
 				v_dl0, v_dl1,
 				va_r,
 				va_g,
 				va_b,
 				va_a,
-				mask03,
-				mask47,
+				tile->m_CoverageMask,
 				&ctx->m_FrameBuffer[tile->m_FrameBufferOffset],
 				ctx->m_Width
 			);
